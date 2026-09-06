@@ -336,7 +336,9 @@ p{ margin: 0 0 .8em; }
   font-size:.82rem; padding: 8px 10px; border-radius: 8px; background: var(--danger-tint);
   border-left: 3px solid var(--danger);
 }
-.indicator-source{ font-size:.75rem; color: var(--text-muted); margin-top:8px; }
+.indicator-source{ font-size:.75rem; color: var(--text-muted); margin-top:8px; display:flex; flex-direction:column; gap:3px; }
+.source-line{ line-height:1.4; }
+.source-tag{ font-weight:700; color: var(--text-muted); }
 
 .comparison-row{
   display:flex; align-items:center; gap:16px; background: var(--surface-2);

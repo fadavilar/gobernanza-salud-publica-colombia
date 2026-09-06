@@ -182,13 +182,19 @@ const DATA = {
       title: "Cobertura real de aseguramiento al SGSSS",
       unit: "% (afiliados activos BDUA ÷ población proyectada DANE)",
       loopLink: "Serie primaria del contexto del nodo 1: confirma, con datos propios y su verdadero denominador poblacional, que la cobertura es alta y estable — la erosión de rectoría no se explica por caída de afiliación.",
-      source: "Elaboración propia del autor: numerador = afiliados en estado \"Activo\", Cubo de Afiliados (BDUA)/SISPRO, corte de diciembre de cada año; denominador = Proyecciones de Población Departamental por Área Geográfica (DANE, base Censo 2018, actualización jul-2025).",
-      sourceUrl: "https://www.sispro.gov.co/",
       labels: [2018,2019,2020,2021,2022,2023,2024,2025],
       values: [96.7,96.5,94.8,94.7,98.4,98.5,98.3,98.2],
+      numerators:   [46647228,47550369,47773868,48405872,50811451,51340341,51728458,52094265],
+      denominators: [48258494,49266526,50390790,51115637,51643565,52117067,52613753,53057212],
+      numeratorLabel: "Afiliados activos (BDUA)",
+      denominatorLabel: "Población proyectada (DANE)",
+      sources: [
+        { label: "SISPRO — Cubo de Afiliados (BDUA), Ministerio de Salud y Protección Social. Numerador: afiliados en estado \"Activo\", corte de diciembre de cada año. Acceso institucional del autor mediante credenciales del aplicativo misional; sin URL pública de consulta directa.", url: null },
+        { label: "DANE — Proyecciones de Población Departamental por Área Geográfica, 2018-2050 (base Censo 2018, actualización julio de 2025). Denominador: total nacional por año.", url: "https://www.dane.gov.co/index.php/estadisticas-por-tema/demografia-y-poblacion/proyecciones-de-poblacion" },
+      ],
       callouts: [
-        { index: 2, text: "2020-2021: la cobertura cede ~2 puntos frente a 2018-2019 — coincide con la pandemia y con procesos de depuración de bases de afiliados." },
-        { index: 7, text: "2025: 98,2% de cobertura real — prácticamente universal y estable desde 2022, lo que refuerza que la crisis documentada en esta revisión es de gobernanza y calidad, no de acceso formal al aseguramiento." },
+        { index: 2, text: "2020: 47.773.868 afiliados activos ÷ 50.390.790 habitantes proyectados = 94,8% — la cobertura cede ~2 puntos frente a 2018-2019, coincidiendo con la pandemia y con procesos de depuración de bases de afiliados." },
+        { index: 7, text: "2025: 52.094.265 afiliados activos ÷ 53.057.212 habitantes proyectados = 98,2% — prácticamente universal y estable desde 2022, lo que refuerza que la crisis documentada en esta revisión es de gobernanza y calidad, no de acceso formal al aseguramiento." },
       ]
     },
     {

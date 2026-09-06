@@ -213,8 +213,8 @@
 
   function buildCausalSVG(){
     const svgNS = "http://www.w3.org/2000/svg";
-    const W = 760, H = 560;
-    const cx = W/2, cy = 268, R = 200;
+    const W = 780, H = 720;
+    const cx = W/2, cy = 440, R = 190;
     const nodes = DATA.causalLoop.nodes;
     const n = nodes.length;
     const pos = {};
@@ -277,7 +277,7 @@
 
     // B1 loop: node 1 <-> external node "Iniciativas de fortalecimiento"
     const n1 = pos[1];
-    const bx = n1.x, by = n1.y - 130;
+    const bx = n1.x, by = n1.y - 150;
     const bnode = document.createElementNS(svgNS,"g");
     bnode.setAttribute("class","node-box");
     bnode.innerHTML = `
@@ -392,6 +392,22 @@
      RENDER: 04 Indicadores (Chart.js)
      ============================================================ */
   const chartInstances = {};
+  function renderSources(ind){
+    const wrap = el("div",{class:"indicator-source"});
+    const list = ind.sources && ind.sources.length ? ind.sources : [{ label: ind.source, url: ind.sourceUrl }];
+    list.forEach((s, i)=>{
+      const line = el("div",{class:"source-line"});
+      line.appendChild(el("span",{class:"source-tag"},["Fuente"+(list.length>1?" "+(i+1):"")+": "]));
+      if(s.url){
+        line.appendChild(el("a",{href:s.url, target:"_blank", rel:"noopener"},[s.label]));
+      } else {
+        line.appendChild(el("span",{},[s.label]));
+        line.appendChild(el("span",{class:"chip-muted chip", style:"margin-left:6px"},["sin URL pública"]));
+      }
+      wrap.appendChild(line);
+    });
+    return wrap;
+  }
   function renderIndicadores(){
     const body = document.getElementById("body-indicadores");
     body.appendChild(el("p",{},[
@@ -409,9 +425,7 @@
       const callBox = el("div",{class:"indicator-callouts"});
       (ind.callouts||[]).forEach(c=> callBox.appendChild(el("div",{class:"callout"},[c.text])));
       block.appendChild(callBox);
-      block.appendChild(el("div",{class:"indicator-source"},[
-        "Fuente: ", el("a",{href:ind.sourceUrl, target:"_blank", rel:"noopener"},[ind.source])
-      ]));
+      block.appendChild(renderSources(ind));
       body.appendChild(block);
     });
 
@@ -436,9 +450,7 @@
           ]),
         ]));
         block.appendChild(el("div",{class:"callout"},[ind.deltaNote]));
-        block.appendChild(el("div",{class:"indicator-source"},[
-          "Fuente: ", el("a",{href:ind.sourceUrl, target:"_blank", rel:"noopener"},[ind.source])
-        ]));
+        block.appendChild(renderSources(ind));
         body.appendChild(block);
       });
     }
@@ -473,7 +485,16 @@
             legend: { display:false },
             tooltip: {
               callbacks: {
-                label: (ctx)=> ind.unit + ": " + ctx.parsed.y.toLocaleString("es-CO")
+                label: (ctx)=> ind.unit + ": " + ctx.parsed.y.toLocaleString("es-CO"),
+                afterLabel: (ctx)=>{
+                  if(!ind.numerators || !ind.denominators) return null;
+                  const num = ind.numerators[ctx.dataIndex], den = ind.denominators[ctx.dataIndex];
+                  if(num == null || den == null) return null;
+                  return [
+                    (ind.numeratorLabel||"Numerador") + ": " + num.toLocaleString("es-CO"),
+                    (ind.denominatorLabel||"Denominador") + ": " + den.toLocaleString("es-CO"),
+                  ];
+                }
               }
             }
           },
