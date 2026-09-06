@@ -333,13 +333,28 @@
   function escapeXML(s){
     return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
+  /* ---------------- APA 7 citation from a study record ---------------- */
+  function apaCitation(study){
+    // study.author looks like "Apellido et al., 2026" or "Name & Name, 2023 (nota)"
+    const m = study.author.match(/^(.*),\s*(\d{4})\s*(.*)$/);
+    const name = m ? m[1].trim() : study.author;
+    const year = m ? m[2] : "";
+    const extra = m && m[3] ? m[3].trim() : "";
+    const text = `${escapeXML(name)} (${escapeXML(year)})${extra ? " "+escapeXML(extra) : ""}. ${escapeXML(study.title)}. ${escapeXML(study.journal)}.`;
+    return { text, url: study.url || null };
+  }
   /* ---------------- Diagram floating tooltip (nodes + R1/B1 loop tags) ---------------- */
   function nodeTooltipHTML(node){
     let html = `<h5>${escapeXML(node.label)}</h5>`;
     if(node.actors) html += `<p style="color:var(--text-muted)">Actores: ${escapeXML(node.actors)}</p>`;
     if(node.studies && node.studies.length){
-      html += `<p>Respaldado por los estudios: ` +
-        node.studies.map(s=>`<span class="study-ref" style="margin-right:4px">${s}</span>`).join("") + `</p>`;
+      html += `<p style="margin-bottom:4px">Respaldado por:</p><ul class="cite-list">` +
+        node.studies.map(n=>{
+          const study = DATA.studies.find(s=>s.n===n);
+          if(!study) return "";
+          const cite = apaCitation(study);
+          return `<li>${cite.url ? `<a href="${cite.url}" target="_blank" rel="noopener">${cite.text}</a>` : cite.text}</li>`;
+        }).join("") + `</ul>`;
     } else {
       html += `<p style="color:var(--text-muted)">Nodo de enlace en la narrativa causal (síntesis del autor); no corresponde a un hallazgo numerado individual.</p>`;
     }
@@ -444,6 +459,68 @@
     });
     return wrap;
   }
+  function fmtNum(n){
+    return typeof n === "number" ? n.toLocaleString("es-CO") : n;
+  }
+  function renderExpandableTable(columns, rows, note){
+    const wrap = el("div",{class:"data-table-toggle-wrap"});
+    const btn = el("button",{class:"data-table-toggle", type:"button","aria-expanded":"false"},[
+      el("span",{},["Ver datos (numerador y denominador)"]),
+      el("svg",{class:"chev",viewBox:"0 0 24 24",fill:"none",html:'<path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'}),
+    ]);
+    const panel = el("div",{class:"data-table-panel"});
+    panel.hidden = true;
+    if(note) panel.appendChild(el("p",{class:"data-table-note"},[note]));
+    const tableWrap = el("div",{class:"table-wrap"});
+    const table = el("table",{class:"data-table"},[
+      el("thead",{},[ el("tr",{},columns.map(c=>el("th",{},[c]))) ]),
+      el("tbody",{},rows.map(r=> el("tr",{}, r.map((cell,ci)=> el("td",{}, [cell]))))),
+    ]);
+    tableWrap.appendChild(table);
+    panel.appendChild(tableWrap);
+    btn.addEventListener("click", ()=>{
+      const willOpen = panel.hidden;
+      panel.hidden = !willOpen;
+      btn.setAttribute("aria-expanded", willOpen ? "true":"false");
+      btn.classList.toggle("open", willOpen);
+    });
+    wrap.appendChild(btn);
+    wrap.appendChild(panel);
+    return wrap;
+  }
+  function buildStandardTable(ind){
+    const hasNumDen = ind.numerators && ind.denominators;
+    const columns = hasNumDen
+      ? ["Periodo", ind.numeratorLabel||"Numerador", ind.denominatorLabel||"Denominador", "Valor"]
+      : ["Periodo", "Valor"];
+    const rows = ind.labels.map((label,i)=>{
+      if(hasNumDen) return [String(label), fmtNum(ind.numerators[i]), fmtNum(ind.denominators[i]), fmtNum(ind.values[i])];
+      return [String(label), fmtNum(ind.values[i])];
+    });
+    return { columns, rows, note: "Unidad de la columna Valor: "+ind.unit };
+  }
+  function buildComparisonTable(ind){
+    return {
+      columns: ["Periodo", "Valor"],
+      rows: [ [ind.before.label, ind.before.value], [ind.after.label, ind.after.value] ]
+    };
+  }
+  function buildEpsRatioTable(ind){
+    const columns = ["EPS", "Meses con dato", "Giro total del periodo (COP)", "Afiliados (dic-2025, BDUA)", ind.epsRatioLabel];
+    const computed = ind.epsRatioTable.map(r=>{
+      const anualizado = (r.giroTotal / r.meses) * 12;
+      const ratio = Math.round(anualizado / r.afiliados2025);
+      return { ...r, ratio };
+    }).sort((a,b)=> b.ratio - a.ratio);
+    const rows = computed.map(r=>[
+      r.eps + (r.intervenida ? " ⚠" : "") + (r.especial ? " ✱" : ""),
+      String(r.meses),
+      fmtNum(r.giroTotal),
+      fmtNum(r.afiliados2025),
+      fmtNum(r.ratio),
+    ]);
+    return { columns, rows, note: (ind.epsRatioNote||"") + " (⚠ bajo intervención/vigilancia especial en 2023-2025 · ✱ régimen especial o fondo de pequeño tamaño, denominador atípico)" };
+  }
   function renderIndicadores(){
     const body = document.getElementById("body-indicadores");
     body.appendChild(el("p",{},[
@@ -462,6 +539,18 @@
       (ind.callouts||[]).forEach(c=> callBox.appendChild(el("div",{class:"callout"},[c.text])));
       block.appendChild(callBox);
       block.appendChild(renderSources(ind));
+      if(ind.epsRatioTable && ind.epsRatioTable.length){
+        const t = buildEpsRatioTable(ind);
+        block.appendChild(renderExpandableTable(t.columns, t.rows, t.note));
+        if(ind.epsAfiliadosSource){
+          const src = renderSources({ sources: [ind.epsAfiliadosSource] });
+          src.style.marginTop = "6px";
+          block.appendChild(src);
+        }
+      } else {
+        const t = buildStandardTable(ind);
+        block.appendChild(renderExpandableTable(t.columns, t.rows, t.note));
+      }
       body.appendChild(block);
     });
 
@@ -487,6 +576,8 @@
         ]));
         block.appendChild(el("div",{class:"callout"},[ind.deltaNote]));
         block.appendChild(renderSources(ind));
+        const t = buildComparisonTable(ind);
+        block.appendChild(renderExpandableTable(t.columns, t.rows));
         body.appendChild(block);
       });
     }

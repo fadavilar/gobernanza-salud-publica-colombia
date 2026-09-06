@@ -223,7 +223,32 @@ const DATA = {
       callouts: [
         { index: 5, text: "Importante sobre esta serie: la herramienta de ADRES solo expone una ventana reciente (no permite consultar 2021-2024), y el salto de ~130 veces entre abril y septiembre de 2025 casi con certeza refleja la ampliación del mecanismo de giro directo a más EPS y conceptos dentro del proceso FEV-RIPS — no un aumento real del gasto total del sistema de esa magnitud. Se presenta como evidencia de que la centralización de ADRES está en marcha, no como serie histórica comparable con los demás indicadores de esta sección." },
         { index: 6, text: "Oct-2025: caída fuerte, consistente con un mes de extracción incompleto (corte parcial) más que con un cambio de política." },
-      ]
+      ],
+      // Cotejo giro ÷ afiliados por EPS: estimación gruesa de intensidad de
+      // giro directo por afiliado, anualizada a partir del promedio mensual
+      // observado (no todas las EPS tienen los mismos meses con dato).
+      epsRatioNote: "Estimación gruesa, no una medición oficial de eficiencia de la UPC: cada EPS tiene un número distinto de meses con giro disponible en la fuente (2 a 6), mezcla EPS de régimen contributivo y subsidiado (con UPC estructuralmente distintas) y algunas tienen denominadores pequeños (miles de afiliados) que hacen el cociente más ruidoso. Útil para comparar orden de magnitud entre EPS intervenidas y no intervenidas, no como cifra definitiva por EPS.",
+      epsRatioLabel: "Giro anualizado por afiliado (COP/año)",
+      epsRatioTable: [
+        { eps: "Fondo de Pasivo Social Ferrocarriles", nit: "800112806", meses: 6, giroTotal: 75286356375, afiliados2025: 27923, intervenida: false, especial: true },
+        { eps: "Aliansalud EPS", nit: "830113831", meses: 5, giroTotal: 239476649450, afiliados2025: 248679, intervenida: false },
+        { eps: "Asociación Indígena del Cauca (AIC)", nit: "817001773", meses: 5, giroTotal: 96170883989, afiliados2025: 257361, intervenida: false, especial: true },
+        { eps: "EPS SURA", nit: "800088702", meses: 3, giroTotal: 812661371165, afiliados2025: 5474957, intervenida: false },
+        { eps: "Compensar", nit: "860066942", meses: 4, giroTotal: 304535158747, afiliados2025: 1759636, intervenida: false },
+        { eps: "SOS (Servicio Occidental de Salud)", nit: "805001157", meses: 4, giroTotal: 109983567749, afiliados2025: 741843, intervenida: false },
+        { eps: "Capital Salud", nit: "900298372", meses: 5, giroTotal: 186589724123, afiliados2025: 1125097, intervenida: false },
+        { eps: "Salud Total", nit: "800130907", meses: 4, giroTotal: 661340570032, afiliados2025: 5260560, intervenida: false },
+        { eps: "Nueva EPS", nit: "900156264", meses: 2, giroTotal: 593662527276, afiliados2025: 11589441, intervenida: true },
+        { eps: "Sanitas", nit: "800251440", meses: 4, giroTotal: 588688349278, afiliados2025: 5915452, intervenida: false },
+        { eps: "Famisanar", nit: "830003564", meses: 5, giroTotal: 255834879736, afiliados2025: 2607546, intervenida: false },
+        { eps: "Capresoca", nit: "891856000", meses: 5, giroTotal: 14940412816, afiliados2025: 167371, intervenida: true },
+        { eps: "Mutual Ser", nit: "806008394", meses: 3, giroTotal: 134728485856, afiliados2025: 2686208, intervenida: true },
+        { eps: "Coosalud", nit: "900226715", meses: 3, giroTotal: 162041419352, afiliados2025: 3353615, intervenida: true },
+        { eps: "Emssanar", nit: "901021565", meses: 4, giroTotal: 79058587761, afiliados2025: 1671574, intervenida: true },
+        { eps: "SaviaSalud (Alianza Medellín Antioquia)", nit: "900604350", meses: 5, giroTotal: 95074963671, afiliados2025: 1673859, intervenida: true },
+        { eps: "Asmet Salud", nit: "900935126", meses: 4, giroTotal: 52732558041, afiliados2025: 1585947, intervenida: true },
+      ],
+      epsAfiliadosSource: { label: "SISPRO — Cubo de Afiliados (BDUA). Afiliados en estado \"Activo\", corte de diciembre de 2025. Acceso institucional del autor; sin URL pública de consulta directa.", url: null },
     }
   ],
 

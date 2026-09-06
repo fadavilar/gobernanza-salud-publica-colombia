@@ -394,6 +394,33 @@ table.studies tr:last-child td{ border-bottom:none; }
 table.studies tr:hover td{ background: var(--surface-2); }
 .db-badge{ font-size:.68rem; padding:2px 7px; border-radius:6px; background: var(--surface-2); border:1px solid var(--border); white-space:nowrap; }
 
+/* Expandable "Ver datos" table under an indicator */
+.data-table-toggle-wrap{ margin-top:10px; }
+.data-table-toggle{
+  display:inline-flex; align-items:center; gap:6px;
+  background:none; border:1px solid var(--border); border-radius:8px;
+  padding:6px 10px; font: inherit; font-size:.78rem; font-weight:600;
+  color: var(--primary-2); cursor:pointer;
+}
+.data-table-toggle:hover{ background: var(--surface); }
+.data-table-toggle .chev{ width:15px; height:15px; transition: transform .18s ease; }
+.data-table-toggle.open .chev{ transform: rotate(180deg); }
+.data-table-panel{ margin-top:10px; }
+.data-table-note{ font-size:.76rem; color: var(--text-muted); margin:0 0 8px; }
+table.data-table{ width:100%; border-collapse: collapse; font-size:.8rem; min-width: 480px; }
+table.data-table th{
+  text-align:left; background: var(--surface-2); padding: 8px 10px; font-size:.7rem;
+  text-transform:uppercase; letter-spacing:.03em; color: var(--text-muted); border-bottom:1px solid var(--border);
+}
+table.data-table td{ padding: 8px 10px; border-bottom:1px solid var(--border); white-space:nowrap; }
+table.data-table tr:last-child td{ border-bottom:none; }
+table.data-table tr:hover td{ background: var(--surface-2); }
+
+/* Citation list inside diagram tooltips */
+.cite-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.cite-list li{ font-size:.78rem; line-height:1.4; }
+.cite-list a{ color: var(--primary-2); }
+
 .filter-row{ display:flex; gap:8px; margin-bottom: 12px; flex-wrap:wrap; }
 .filter-chip{
   font-size:.78rem; padding: 6px 12px; border-radius: 999px; border:1px solid var(--border);
