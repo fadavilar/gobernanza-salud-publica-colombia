@@ -176,6 +176,34 @@ const DATA = {
       callouts: [
         { index: 3, text: "2025: MinSalud ocupa el puesto 1 (99,14%) — la paradoja de implementación central de este diagnóstico: cumplimiento administrativo formal en ascenso mientras la gobernanza percibida y los indicadores de tensión del sistema (tutelas, cartera) empeoran en el mismo periodo." },
       ]
+    },
+    {
+      id: "afiliados-bdua",
+      title: "Total de afiliados activos al SGSSS (BDUA)",
+      unit: "Personas afiliadas (diciembre de cada año)",
+      loopLink: "Serie primaria del contexto del nodo 1: confirma con datos mes a mes que la cobertura crece de forma sostenida — la erosión de rectoría no se explica por caída de afiliación.",
+      source: "Elaboración propia a partir del Cubo de Afiliados (BDUA), SISPRO — Ministerio de Salud y Protección Social (extracción directa del autor, corte diciembre de cada año; dato 2025 preliminar).",
+      sourceUrl: "https://www.sispro.gov.co/",
+      labels: [2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
+      values: [43566551,47716268,50121748,51633538,51738735,54111625,54621705,54614753,55534956,55857476,55456623,56594494,57687032,59072704,60463304,61089109,61816961],
+      callouts: [
+        { index: 10, text: "2019: única caída interanual de la serie (55,86M → 55,46M) — coincide con el inicio de procesos de depuración de bases de datos de afiliados antes de la pandemia." },
+        { index: 16, text: "2025: 61,8 millones de afiliados activos — el sistema sigue creciendo en cobertura incluso mientras se acumula la cartera hospitalaria y suben las tutelas en el mismo periodo." },
+      ]
+    },
+    {
+      id: "eps-activas-bdua",
+      title: "Entidades administradoras con afiliados activos en BDUA",
+      unit: "N.º de códigos de entidad (EPS/EPS-S) con afiliados > 0",
+      loopLink: "Variable proxy directa del nodo 2 (Fragmentación institucional y financiera): cuenta cuántas entidades administran la afiliación del sistema cada año.",
+      source: "Elaboración propia a partir del Cubo de Afiliados (BDUA), SISPRO — Ministerio de Salud y Protección Social (extracción directa del autor, corte diciembre de cada año; dato 2025 preliminar).",
+      sourceUrl: "https://www.sispro.gov.co/",
+      labels: [2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
+      values: [80,78,80,80,80,115,133,139,145,152,154,154,153,155,156,156,158],
+      callouts: [
+        { index: 5, text: "2014: salto de 80 a 115 entidades activas en un solo año — la fragmentación medida por número de administradoras casi se duplica entre 2013 y 2018, justo cuando la literatura documenta subfinanciación crónica e integración vertical de aseguradoras." },
+        { index: 16, text: "2025: 158 entidades con afiliados activos — el doble que en 2013, pese a los procesos de intervención y liquidación de EPS documentados en el mismo periodo." },
+      ]
     }
   ],
 

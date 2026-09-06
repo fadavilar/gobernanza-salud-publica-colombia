@@ -4,9 +4,11 @@
 *.csv
 *.ris
 *.docx
+*.xlsx
+*.xls
+*.pdf
 ese_indicadores_notas.md
 ImplementationResearchCourse_v*.txt
-Module1_Chapter_*.pdf
 
 # OS / editor cruft
 .DS_Store
