@@ -275,8 +275,9 @@ p{ margin: 0 0 .8em; }
    Causal diagram
    ============================================================ */
 .diagram-wrap{
+  position: relative;
   background: var(--surface-2); border:1px solid var(--border); border-radius: var(--radius);
-  padding: 10px; overflow-x: auto;
+  padding: 10px; overflow: auto;
 }
 .diagram-wrap svg{ display:block; margin:0 auto; min-width: 520px; }
 .node-box{ cursor:pointer; }
@@ -290,9 +291,12 @@ p{ margin: 0 0 .8em; }
 }
 .edge-label.neg{ fill: var(--danger); }
 .edge-label.pos{ fill: var(--success); }
-.loop-tag{ font-size: 12px; font-weight:800; }
+.loop-tag{ font-size: 13px; font-weight:800; }
 .loop-tag.r{ fill: var(--danger); }
 .loop-tag.b{ fill: var(--success); }
+.loop-tag-group{ cursor:pointer; }
+.loop-tag-group rect{ fill: transparent; }
+.loop-tag-group:hover rect, .loop-tag-group.active rect{ fill: color-mix(in srgb, currentColor 12%, transparent); }
 .b1-edge{ stroke-dasharray: 5 4; stroke: var(--success); }
 
 .loop-legend{ display:flex; flex-wrap:wrap; gap: 14px; margin-top: 14px; font-size:.82rem; }
@@ -300,22 +304,20 @@ p{ margin: 0 0 .8em; }
 .loop-legend .sw{ width:14px; height:14px; border-radius:4px; }
 .sw-r{ background: var(--danger); }
 .sw-b{ background: var(--success); }
+.diagram-hint{ font-size:.78rem; color: var(--text-muted); margin-top:10px; }
 
-.node-detail{
-  margin-top: 14px; padding: 14px 16px; border-radius: 12px;
-  background: var(--surface); border:1px solid var(--border);
-  font-size:.88rem; display:none;
+/* Floating callout for node/loop hover, anchored inside .diagram-wrap */
+.diagram-tooltip{
+  position:absolute; z-index: 20; max-width: 280px;
+  background: var(--surface); border:1px solid var(--primary-2); border-radius: 12px;
+  padding: 12px 14px; box-shadow: var(--shadow-lg); font-size:.82rem;
+  pointer-events:none; transition: opacity .12s ease;
 }
-.node-detail.show{ display:block; }
-.node-detail h5{ margin:0 0 4px; font-size:.9rem; }
-
-.loop-card{
-  border:1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-top:14px;
-}
-.loop-card.r{ border-left: 4px solid var(--danger); }
-.loop-card.b{ border-left: 4px solid var(--success); }
-.loop-card h4{ font-size:.9rem; margin-bottom:6px; }
-.loop-card .initiatives{ display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.diagram-tooltip[hidden]{ display:none; }
+.diagram-tooltip h5{ margin:0 0 4px; font-size:.88rem; }
+.diagram-tooltip p{ margin:0 0 6px; }
+.diagram-tooltip p:last-child{ margin-bottom:0; }
+.diagram-tooltip .initiatives{ display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
 .tag-pill{
   font-size:.74rem; padding:3px 9px; border-radius:999px; background: var(--surface-2); color: var(--text-muted);
   border:1px solid var(--border);

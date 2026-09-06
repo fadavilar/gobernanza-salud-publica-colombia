@@ -178,11 +178,12 @@
   function renderDiagnostico(){
     const body = document.getElementById("body-diagnostico");
     body.appendChild(el("p",{},[
-      "Diagrama de bucles causales que sintetiza el diagnóstico emergente. Toca o pasa el cursor sobre cada nodo para ver los actores institucionales y los estudios que lo respaldan."
+      "Diagrama de bucles causales que sintetiza el diagnóstico emergente. Toca o pasa el cursor sobre un nodo para ver los actores y estudios que lo respaldan, o sobre las etiquetas R1 / B1 para leer la explicación completa de cada bucle."
     ]));
 
     const wrap = el("div",{class:"diagram-wrap"});
     wrap.appendChild(buildCausalSVG());
+    wrap.appendChild(el("div",{class:"diagram-tooltip",id:"diagram-tooltip",hidden:"hidden"}));
     body.appendChild(wrap);
 
     body.appendChild(el("div",{class:"loop-legend"},[
@@ -192,23 +193,8 @@
       el("span",{class:"swatch"},[el("span",{style:"color:var(--success);font-weight:800"},["+"]), " las variables cambian en el mismo sentido"]),
     ]));
 
-    const detail = el("div",{class:"node-detail",id:"node-detail"});
-    body.appendChild(detail);
-
-    DATA.causalLoop.loops.forEach(loop=>{
-      const card = el("div",{class:"loop-card "+(loop.type==="reforzamiento"?"r":"b")},[
-        el("h4",{},[loop.title]),
-        el("p",{style:"margin:0;font-size:.88rem"},[loop.text]),
-      ]);
-      if(loop.relatedInitiatives){
-        const tags = el("div",{class:"initiatives"});
-        loop.relatedInitiatives.forEach(t=> tags.appendChild(el("span",{class:"tag-pill"},[t])));
-        card.appendChild(tags);
-      }
-      body.appendChild(card);
-    });
-
-    body.appendChild(el("p",{class:"indicator-source", style:"margin-top:12px"},[DATA.causalLoop.citation]));
+    body.appendChild(el("p",{class:"diagram-hint"},["Consejo: los nodos y las etiquetas R1/B1 son interactivos — pasa el cursor o tócalos para ver el detalle sin perder de vista el resto del diagrama."]));
+    body.appendChild(el("p",{class:"indicator-source", style:"margin-top:8px"},[DATA.causalLoop.citation]));
   }
 
   function buildCausalSVG(){
@@ -236,21 +222,16 @@
       </marker>`;
     svg.appendChild(defs);
 
-    // R1 loop tag (center)
-    const centerLabel = document.createElementNS(svgNS,"text");
-    centerLabel.setAttribute("x", cx); centerLabel.setAttribute("y", cy-6);
-    centerLabel.setAttribute("text-anchor","middle");
-    centerLabel.setAttribute("class","loop-tag r");
-    centerLabel.textContent = "R1";
-    svg.appendChild(centerLabel);
-    const centerSub = document.createElementNS(svgNS,"text");
-    centerSub.setAttribute("x", cx); centerSub.setAttribute("y", cy+14);
-    centerSub.setAttribute("text-anchor","middle");
-    centerSub.setAttribute("font-size","10");
-    centerSub.setAttribute("fill","currentColor");
-    centerSub.setAttribute("style","fill:var(--text-muted)");
-    centerSub.textContent = "erosión acumulativa";
-    svg.appendChild(centerSub);
+    // R1 loop tag (center) — hoverable group with full loop explanation
+    const r1Loop = DATA.causalLoop.loops.find(l=>l.id==="R1");
+    const r1Group = document.createElementNS(svgNS,"g");
+    r1Group.setAttribute("class","loop-tag-group r");
+    r1Group.innerHTML = `
+      <rect x="${cx-70}" y="${cy-26}" width="140" height="46" rx="10"></rect>
+      <text x="${cx}" y="${cy-6}" text-anchor="middle" class="loop-tag r">R1</text>
+      <text x="${cx}" y="${cy+14}" text-anchor="middle" font-size="10" style="fill:var(--text-muted)">erosión acumulativa</text>`;
+    if(r1Loop) attachLoopTooltip(r1Group, r1Loop);
+    svg.appendChild(r1Group);
 
     // Edges (R1 loop, curved along circle)
     DATA.causalLoop.edges.forEach(edge=>{
@@ -304,10 +285,16 @@
     lblFromB.setAttribute("class","edge-label pos"); lblFromB.textContent="+ (demora)";
     svg.appendChild(lblFromB);
 
-    const bTag = document.createElementNS(svgNS,"text");
-    bTag.setAttribute("x", bx); bTag.setAttribute("y", by-40);
-    bTag.setAttribute("text-anchor","middle"); bTag.setAttribute("class","loop-tag b");
-    bTag.textContent = "B1"; svg.appendChild(bTag);
+    // B1 tag sits at the vertical midpoint of the two dashed arcs, inside the small loop
+    const b1Loop = DATA.causalLoop.loops.find(l=>l.id==="B1");
+    const bTagY = (by + n1.y) / 2 + 6;
+    const b1Group = document.createElementNS(svgNS,"g");
+    b1Group.setAttribute("class","loop-tag-group b");
+    b1Group.innerHTML = `
+      <rect x="${bx-24}" y="${bTagY-16}" width="48" height="26" rx="8"></rect>
+      <text x="${bx}" y="${bTagY}" text-anchor="middle" class="loop-tag b">B1</text>`;
+    if(b1Loop) attachLoopTooltip(b1Group, b1Loop);
+    svg.appendChild(b1Group);
 
     // Main nodes
     nodes.forEach(node=>{
@@ -326,11 +313,11 @@
         html += `<text x="${p.x}" y="${p.y + boxH/2 - 8}" text-anchor="middle" class="actors">${escapeXML(node.actors)}</text>`;
       }
       g.innerHTML = html;
-      g.addEventListener("click", ()=> showNodeDetail(node, g));
-      g.addEventListener("mouseenter", ()=> showNodeDetail(node, g));
+      attachNodeTooltip(g, node);
       svg.appendChild(g);
     });
 
+    svg.addEventListener("mouseleave", hideDiagramTooltip);
     return svg;
   }
   function wrapLabel(text, maxChars){
@@ -346,20 +333,69 @@
   function escapeXML(s){
     return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
-  function showNodeDetail(node, gEl){
-    document.querySelectorAll(".node-box").forEach(n=>n.classList.remove("active"));
-    gEl.classList.add("active");
-    const box = document.getElementById("node-detail");
+  /* ---------------- Diagram floating tooltip (nodes + R1/B1 loop tags) ---------------- */
+  function nodeTooltipHTML(node){
     let html = `<h5>${escapeXML(node.label)}</h5>`;
-    if(node.actors) html += `<p style="margin:0 0 6px;color:var(--text-muted)">Actores: ${escapeXML(node.actors)}</p>`;
+    if(node.actors) html += `<p style="color:var(--text-muted)">Actores: ${escapeXML(node.actors)}</p>`;
     if(node.studies && node.studies.length){
-      html += `<p style="margin:0">Respaldado por los estudios: ` +
+      html += `<p>Respaldado por los estudios: ` +
         node.studies.map(s=>`<span class="study-ref" style="margin-right:4px">${s}</span>`).join("") + `</p>`;
     } else {
-      html += `<p style="margin:0;color:var(--text-muted)">Nodo de enlace en la narrativa causal (síntesis del autor); no corresponde a un hallazgo numerado individual.</p>`;
+      html += `<p style="color:var(--text-muted)">Nodo de enlace en la narrativa causal (síntesis del autor); no corresponde a un hallazgo numerado individual.</p>`;
     }
-    box.innerHTML = html;
-    box.classList.add("show");
+    return html;
+  }
+  function loopTooltipHTML(loop){
+    let html = `<h5>${escapeXML(loop.title)}</h5><p>${escapeXML(loop.text)}</p>`;
+    if(loop.relatedInitiatives){
+      html += `<div class="initiatives">` +
+        loop.relatedInitiatives.map(t=>`<span class="tag-pill">${escapeXML(t)}</span>`).join("") + `</div>`;
+    }
+    return html;
+  }
+  function attachNodeTooltip(gEl, node){
+    const show = ()=>{
+      document.querySelectorAll(".node-box, .loop-tag-group").forEach(n=>n.classList.remove("active"));
+      gEl.classList.add("active");
+      showDiagramTooltip(gEl, nodeTooltipHTML(node));
+    };
+    gEl.addEventListener("mouseenter", show);
+    gEl.addEventListener("click", (e)=>{ e.stopPropagation(); show(); });
+  }
+  function attachLoopTooltip(gEl, loop){
+    const show = ()=>{
+      document.querySelectorAll(".node-box, .loop-tag-group").forEach(n=>n.classList.remove("active"));
+      gEl.classList.add("active");
+      showDiagramTooltip(gEl, loopTooltipHTML(loop));
+    };
+    gEl.addEventListener("mouseenter", show);
+    gEl.addEventListener("click", (e)=>{ e.stopPropagation(); show(); });
+  }
+  function showDiagramTooltip(targetEl, html){
+    const tooltip = document.getElementById("diagram-tooltip");
+    const wrap = targetEl.closest(".diagram-wrap");
+    if(!tooltip || !wrap) return;
+    tooltip.innerHTML = html;
+    tooltip.hidden = false;
+    const wrapRect = wrap.getBoundingClientRect();
+    const elRect = targetEl.getBoundingClientRect();
+    const cx = elRect.left - wrapRect.left + wrap.scrollLeft + elRect.width/2;
+    const topOfEl = elRect.top - wrapRect.top + wrap.scrollTop;
+    const bottomOfEl = elRect.bottom - wrapRect.top + wrap.scrollTop;
+    requestAnimationFrame(()=>{
+      const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+      let left = cx - tw/2;
+      let top = topOfEl - th - 10;
+      if(top < wrap.scrollTop + 4) top = bottomOfEl + 10;
+      left = Math.max(wrap.scrollLeft + 6, Math.min(left, wrap.scrollLeft + wrapRect.width - tw - 6));
+      tooltip.style.left = left + "px";
+      tooltip.style.top = top + "px";
+    });
+  }
+  function hideDiagramTooltip(){
+    const tooltip = document.getElementById("diagram-tooltip");
+    if(tooltip) tooltip.hidden = true;
+    document.querySelectorAll(".node-box, .loop-tag-group").forEach(n=>n.classList.remove("active"));
   }
 
   /* ============================================================
@@ -650,6 +686,10 @@
     document.getElementById("theme-toggle").addEventListener("click", toggleTheme);
     document.getElementById("expand-all").addEventListener("click", ()=> setAllSections(true));
     document.getElementById("collapse-all").addEventListener("click", ()=> setAllSections(false));
+
+    document.addEventListener("click", (e)=>{
+      if(!e.target.closest || !e.target.closest(".node-box, .loop-tag-group")) hideDiagramTooltip();
+    });
 
     // render charts for the sections that start open / once Chart.js is ready
     if(document.getElementById("sec-indicadores").classList.contains("open")) renderAllCharts();
