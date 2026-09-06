@@ -178,17 +178,17 @@ const DATA = {
       ]
     },
     {
-      id: "afiliados-bdua",
-      title: "Total de afiliados activos al SGSSS (BDUA)",
-      unit: "Personas afiliadas (diciembre de cada año)",
-      loopLink: "Serie primaria del contexto del nodo 1: confirma con datos mes a mes que la cobertura crece de forma sostenida — la erosión de rectoría no se explica por caída de afiliación.",
-      source: "Elaboración propia a partir del Cubo de Afiliados (BDUA), SISPRO — Ministerio de Salud y Protección Social (extracción directa del autor, corte diciembre de cada año; dato 2025 preliminar).",
+      id: "cobertura-bdua",
+      title: "Cobertura real de aseguramiento al SGSSS",
+      unit: "% (afiliados activos BDUA ÷ población proyectada DANE)",
+      loopLink: "Serie primaria del contexto del nodo 1: confirma, con datos propios y su verdadero denominador poblacional, que la cobertura es alta y estable — la erosión de rectoría no se explica por caída de afiliación.",
+      source: "Elaboración propia del autor: numerador = afiliados en estado \"Activo\", Cubo de Afiliados (BDUA)/SISPRO, corte de diciembre de cada año; denominador = Proyecciones de Población Departamental por Área Geográfica (DANE, base Censo 2018, actualización jul-2025).",
       sourceUrl: "https://www.sispro.gov.co/",
-      labels: [2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
-      values: [43566551,47716268,50121748,51633538,51738735,54111625,54621705,54614753,55534956,55857476,55456623,56594494,57687032,59072704,60463304,61089109,61816961],
+      labels: [2018,2019,2020,2021,2022,2023,2024,2025],
+      values: [96.7,96.5,94.8,94.7,98.4,98.5,98.3,98.2],
       callouts: [
-        { index: 10, text: "2019: única caída interanual de la serie (55,86M → 55,46M) — coincide con el inicio de procesos de depuración de bases de datos de afiliados antes de la pandemia." },
-        { index: 16, text: "2025: 61,8 millones de afiliados activos — el sistema sigue creciendo en cobertura incluso mientras se acumula la cartera hospitalaria y suben las tutelas en el mismo periodo." },
+        { index: 2, text: "2020-2021: la cobertura cede ~2 puntos frente a 2018-2019 — coincide con la pandemia y con procesos de depuración de bases de afiliados." },
+        { index: 7, text: "2025: 98,2% de cobertura real — prácticamente universal y estable desde 2022, lo que refuerza que la crisis documentada en esta revisión es de gobernanza y calidad, no de acceso formal al aseguramiento." },
       ]
     },
     {
@@ -196,13 +196,27 @@ const DATA = {
       title: "Entidades administradoras con afiliados activos en BDUA",
       unit: "N.º de códigos de entidad (EPS/EPS-S) con afiliados > 0",
       loopLink: "Variable proxy directa del nodo 2 (Fragmentación institucional y financiera): cuenta cuántas entidades administran la afiliación del sistema cada año.",
-      source: "Elaboración propia a partir del Cubo de Afiliados (BDUA), SISPRO — Ministerio de Salud y Protección Social (extracción directa del autor, corte diciembre de cada año; dato 2025 preliminar).",
+      source: "Elaboración propia a partir del Cubo de Afiliados (BDUA), SISPRO — Ministerio de Salud y Protección Social (extracción directa del autor; solo afiliados en estado \"Activo\"; corte diciembre de cada año, 2025 preliminar).",
       sourceUrl: "https://www.sispro.gov.co/",
       labels: [2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],
-      values: [80,78,80,80,80,115,133,139,145,152,154,154,153,155,156,156,158],
+      values: [79,73,73,70,66,94,103,103,99,102,99,98,86,76,75,75,74],
       callouts: [
-        { index: 5, text: "2014: salto de 80 a 115 entidades activas en un solo año — la fragmentación medida por número de administradoras casi se duplica entre 2013 y 2018, justo cuando la literatura documenta subfinanciación crónica e integración vertical de aseguradoras." },
-        { index: 16, text: "2025: 158 entidades con afiliados activos — el doble que en 2013, pese a los procesos de intervención y liquidación de EPS documentados en el mismo periodo." },
+        { index: 6, text: "2013-2015: el número de administradoras con afiliados activos sube de 66 a 103 — mayor fragmentación del sistema en el periodo previo a esta revisión." },
+        { index: 16, text: "2025: 74 entidades activas, la cifra más baja de toda la serie — una fuerte consolidación desde el pico de 2015-2016 (103), consistente con la ola de intervenciones y liquidaciones de EPS documentada entre 2023 y 2025 (Asmet, Emssanar, SaviaSalud, Nueva EPS, Capresoca)." },
+      ]
+    },
+    {
+      id: "giros-adres",
+      title: "Giros directos de ADRES a 17 EPS consultadas",
+      unit: "Billones de pesos COP / mes",
+      loopLink: "Evidencia reciente y directa del bucle B1 (iniciativas de fortalecimiento): mide la intensidad del mecanismo de giro directo de ADRES, la pieza operativa de la centralización analítica (FEV-RIPS, 2024-2025) documentada en la revisión.",
+      source: "Elaboración propia del autor: extracción directa, entidad por entidad, de la herramienta \"Lupa al Giro\" de ADRES sobre 17 EPS (7 bajo intervención/vigilancia especial, 7 grandes no intervenidas, 3 públicas o de régimen especial).",
+      sourceUrl: "https://www.adres.gov.co/lupa-al-giro/identifica-tu-giro",
+      labels: ["Abr-2025","May-2025","Jun-2025","Jul-2025","Ago-2025","Sep-2025","Oct-2025"],
+      values: [0.013,0.024,0.301,0.903,1.528,1.687,0.008],
+      callouts: [
+        { index: 5, text: "Importante sobre esta serie: la herramienta de ADRES solo expone una ventana reciente (no permite consultar 2021-2024), y el salto de ~130 veces entre abril y septiembre de 2025 casi con certeza refleja la ampliación del mecanismo de giro directo a más EPS y conceptos dentro del proceso FEV-RIPS — no un aumento real del gasto total del sistema de esa magnitud. Se presenta como evidencia de que la centralización de ADRES está en marcha, no como serie histórica comparable con los demás indicadores de esta sección." },
+        { index: 6, text: "Oct-2025: caída fuerte, consistente con un mes de extracción incompleto (corte parcial) más que con un cambio de política." },
       ]
     }
   ],
@@ -212,16 +226,6 @@ const DATA = {
   // no series densas) — se muestran como tarjetas antes/después.
   // ------------------------------------------------------------------
   comparisonIndicators: [
-    {
-      id: "aseguramiento",
-      title: "Cobertura de aseguramiento al SGSSS",
-      loopLink: "Contexto del nodo 1 (Capacidad de rectoría central): la cobertura formal es casi universal — el diagnóstico de erosión de la rectoría no es un problema de afiliación, sino de calidad y gobernanza de lo ya cubierto.",
-      before: { label: "1995", value: "29,2%" },
-      after: { label: "2024 (cierre)", value: "98,6%" },
-      deltaNote: "Cobertura prácticamente universal — la crisis de gobernanza documentada en esta revisión ocurre a pesar de, no por falta de, aseguramiento formal.",
-      source: "Ministerio de Salud y Protección Social — Base de Datos Única de Afiliados (BDUA), serie de aseguramiento en salud.",
-      sourceUrl: "https://www.minsalud.gov.co/proteccionsocial/Regimensubsidiado/paginas/coberturas-del-regimen-subsidiado.aspx"
-    },
     {
       id: "bolsillo",
       title: "Gasto de bolsillo en salud",
