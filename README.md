@@ -38,4 +38,4 @@ Para editar contenido, generalmente basta con modificar `js/data.js`; el resto s
 
 ## Autor
 
-Fabián Dávila Ramírez — Universidad del Rosario · Universidad de Navarra · Adium Colombia S.A.S.
+Fabian Dávila Ramírez, MD, MBA, PhD — Universidad de Navarra

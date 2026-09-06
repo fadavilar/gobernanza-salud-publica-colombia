@@ -338,6 +338,20 @@ p{ margin: 0 0 .8em; }
 }
 .indicator-source{ font-size:.75rem; color: var(--text-muted); margin-top:8px; }
 
+.comparison-row{
+  display:flex; align-items:center; gap:16px; background: var(--surface-2);
+  border:1px solid var(--border); border-radius:12px; padding: 16px; margin-bottom:10px;
+}
+.comparison-point{ flex:1; text-align:center; }
+.comparison-point .cp-label{ font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; color: var(--text-muted); font-weight:700; }
+.comparison-point .cp-value{ font-size:1.5rem; font-weight:800; color: var(--text); margin-top:2px; }
+.comparison-point.after .cp-value{ color: var(--primary-2); }
+.comparison-arrow{ flex:none; width:24px; height:24px; color: var(--text-muted); }
+@media (max-width:520px){
+  .comparison-row{ gap:8px; padding:12px; }
+  .comparison-point .cp-value{ font-size:1.15rem; }
+}
+
 /* ============================================================
    Recommendations
    ============================================================ */
@@ -411,6 +425,18 @@ table.studies tr:hover td{ background: var(--surface-2); }
   background: var(--surface); border:1px solid var(--border); border-radius: var(--radius);
   padding: 14px 16px; margin-bottom: 16px;
 }
+.cc-block{
+  display:flex; align-items:center; gap:12px; margin-top: 14px; padding-top:14px;
+  border-top:1px solid var(--border); flex-wrap:wrap;
+}
+.cc-badge{
+  flex:none; display:inline-flex; align-items:center; gap:7px;
+  color: var(--text-muted); text-decoration:none; font-size:.76rem; font-weight:600;
+  border:1px solid var(--border); border-radius:999px; padding:5px 12px 5px 8px;
+  transition: color .15s ease, border-color .15s ease;
+}
+.cc-badge:hover{ color: var(--primary-2); border-color: var(--primary-2); }
+.cc-block p{ margin:0; font-size:.78rem; color: var(--text-muted); flex:1 1 240px; }
 
 /* ============================================================
    Responsive

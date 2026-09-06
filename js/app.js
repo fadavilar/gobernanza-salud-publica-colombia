@@ -35,10 +35,12 @@
 
   /* ---------------- Utility ---------------- */
   function el(tag, attrs, children){
-    const node = document.createElement(tag);
+    const node = tag === "svg"
+      ? document.createElementNS("http://www.w3.org/2000/svg", tag)
+      : document.createElement(tag);
     if(attrs){
       Object.keys(attrs).forEach(k=>{
-        if(k === "class") node.className = attrs[k];
+        if(k === "class") node.setAttribute("class", attrs[k]);
         else if(k === "html") node.innerHTML = attrs[k];
         else node.setAttribute(k, attrs[k]);
       });
@@ -118,7 +120,7 @@
     document.getElementById("hero-framework").textContent = DATA.meta.framework;
     document.getElementById("hero-period").textContent = DATA.meta.period;
     document.getElementById("byline").innerHTML =
-      `<strong>${DATA.meta.author}</strong> · ${DATA.meta.affiliation}`;
+      `<strong>${DATA.meta.author}</strong>${DATA.meta.credentials ? ", "+DATA.meta.credentials : ""} · ${DATA.meta.affiliation}`;
 
     const grid = document.getElementById("stat-grid");
     DATA.stats.forEach(s=>{
@@ -130,8 +132,26 @@
     });
 
     document.getElementById("footer-disclaimer").textContent = DATA.meta.disclaimer;
-    document.getElementById("footer-author").textContent = DATA.meta.author + " · " + DATA.meta.affiliation;
+    document.getElementById("footer-author").textContent =
+      DATA.meta.author + (DATA.meta.credentials ? ", "+DATA.meta.credentials : "") + " · " + DATA.meta.affiliation;
     document.getElementById("year").textContent = new Date().getFullYear();
+
+    if(DATA.meta.license){
+      const lic = DATA.meta.license;
+      const badge = document.getElementById("cc-badge");
+      badge.href = lic.url;
+      badge.title = lic.name;
+      badge.innerHTML = `
+        <svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true">
+          <circle cx="16" cy="16" r="15" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <circle cx="11.2" cy="16" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <circle cx="20.8" cy="16" r="6.4" fill="none" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M13 13.1c-.7-.5-1.4-.7-2.2-.7-1.9 0-3.3 1.5-3.3 3.6s1.4 3.6 3.3 3.6c.9 0 1.6-.2 2.3-.8l-.6-1.1c-.5.4-1 .6-1.6.6-1.1 0-1.9-.9-1.9-2.3s.8-2.3 1.9-2.3c.5 0 1 .2 1.5.5z" fill="currentColor" stroke="none"/>
+          <path d="M22.6 13.1c-.7-.5-1.4-.7-2.2-.7-1.9 0-3.3 1.5-3.3 3.6s1.4 3.6 3.3 3.6c.9 0 1.6-.2 2.3-.8l-.6-1.1c-.5.4-1 .6-1.6.6-1.1 0-1.9-.9-1.9-2.3s.8-2.3 1.9-2.3c.5 0 1 .2 1.5.5z" fill="currentColor" stroke="none"/>
+        </svg>
+        <span>${lic.name}</span>`;
+      document.getElementById("footer-license-text").textContent = lic.text;
+    }
   }
 
   /* ============================================================
@@ -394,6 +414,34 @@
       ]));
       body.appendChild(block);
     });
+
+    if(DATA.comparisonIndicators && DATA.comparisonIndicators.length){
+      body.appendChild(el("h4",{style:"font-size:.86rem;margin:22px 0 4px"},["Indicadores complementarios (dos puntos verificados, no series densas)"]));
+      DATA.comparisonIndicators.forEach(ind=>{
+        const block = el("div",{class:"indicator-block"});
+        block.appendChild(el("div",{class:"indicator-head"},[
+          el("h4",{},[ind.title]),
+          ind.unit ? el("span",{class:"unit"},[ind.unit]) : null,
+        ]));
+        block.appendChild(el("div",{class:"indicator-linklet"},[ind.loopLink]));
+        block.appendChild(el("div",{class:"comparison-row"},[
+          el("div",{class:"comparison-point"},[
+            el("div",{class:"cp-label"},[ind.before.label]),
+            el("div",{class:"cp-value"},[ind.before.value]),
+          ]),
+          el("svg",{class:"comparison-arrow",viewBox:"0 0 24 24",fill:"none",html:'<path d="M4 12h15M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'}),
+          el("div",{class:"comparison-point after"},[
+            el("div",{class:"cp-label"},[ind.after.label]),
+            el("div",{class:"cp-value"},[ind.after.value]),
+          ]),
+        ]));
+        block.appendChild(el("div",{class:"callout"},[ind.deltaNote]));
+        block.appendChild(el("div",{class:"indicator-source"},[
+          "Fuente: ", el("a",{href:ind.sourceUrl, target:"_blank", rel:"noopener"},[ind.source])
+        ]));
+        body.appendChild(block);
+      });
+    }
   }
   function renderAllCharts(){
     if(typeof Chart === "undefined") return;

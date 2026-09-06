@@ -10,11 +10,17 @@ const DATA = {
   meta: {
     title: "Gobernanza y Rectoría en Salud Pública en Colombia",
     subtitle: "Explorador interactivo del diagnóstico causal, la evidencia y las recomendaciones",
-    author: "Fabián Dávila Ramírez",
-    affiliation: "Universidad del Rosario · Universidad de Navarra · Adium Colombia S.A.S.",
+    author: "Fabian Dávila Ramírez",
+    credentials: "MD, MBA, PhD",
+    affiliation: "Universidad de Navarra",
     period: "Evidencia académica 2021–2026",
     framework: "Revisión de alcance · marco PCC (Población–Concepto–Contexto)",
-    disclaimer: "Esta aplicación resume el diagnóstico y los hallazgos centrales de una revisión de alcance más extensa, actualmente en preparación para publicación. Por esa razón se presenta aquí una síntesis infográfica y no el manuscrito completo. Las recomendaciones y la lectura desde investigación de implementación son una elaboración propia del autor a partir del diagnóstico causal, no hallazgos textuales de los estudios incluidos."
+    disclaimer: "Esta aplicación resume el diagnóstico y los hallazgos centrales de una revisión de alcance más extensa, actualmente en preparación para publicación. Por esa razón se presenta aquí una síntesis infográfica y no el manuscrito completo. Las recomendaciones y la lectura desde investigación de implementación son una elaboración propia del autor a partir del diagnóstico causal, no hallazgos textuales de los estudios incluidos.",
+    license: {
+      name: "Creative Commons Atribución 4.0 Internacional (CC BY 4.0)",
+      url: "https://creativecommons.org/licenses/by/4.0/deed.es",
+      text: "Este contenido puede compartirse y adaptarse libremente, incluso con fines comerciales, siempre citando al autor."
+    }
   },
 
   stats: [
@@ -171,6 +177,45 @@ const DATA = {
         { index: 3, text: "2025: MinSalud ocupa el puesto 1 (99,14%) — la paradoja de implementación central de este diagnóstico: cumplimiento administrativo formal en ascenso mientras la gobernanza percibida y los indicadores de tensión del sistema (tutelas, cartera) empeoran en el mismo periodo." },
       ]
     }
+  ],
+
+  // ------------------------------------------------------------------
+  // Indicadores de comparación (dos puntos temporales verificados,
+  // no series densas) — se muestran como tarjetas antes/después.
+  // ------------------------------------------------------------------
+  comparisonIndicators: [
+    {
+      id: "aseguramiento",
+      title: "Cobertura de aseguramiento al SGSSS",
+      loopLink: "Contexto del nodo 1 (Capacidad de rectoría central): la cobertura formal es casi universal — el diagnóstico de erosión de la rectoría no es un problema de afiliación, sino de calidad y gobernanza de lo ya cubierto.",
+      before: { label: "1995", value: "29,2%" },
+      after: { label: "2024 (cierre)", value: "98,6%" },
+      deltaNote: "Cobertura prácticamente universal — la crisis de gobernanza documentada en esta revisión ocurre a pesar de, no por falta de, aseguramiento formal.",
+      source: "Ministerio de Salud y Protección Social — Base de Datos Única de Afiliados (BDUA), serie de aseguramiento en salud.",
+      sourceUrl: "https://www.minsalud.gov.co/proteccionsocial/Regimensubsidiado/paginas/coberturas-del-regimen-subsidiado.aspx"
+    },
+    {
+      id: "bolsillo",
+      title: "Gasto de bolsillo en salud",
+      unit: "% del gasto corriente en salud",
+      loopLink: "Variable proxy adicional del nodo 2 (Fragmentación institucional y financiera): a mayor fragmentación del aseguramiento, mayor carga trasladada directamente a los hogares.",
+      before: { label: "2019", value: "15,8%" },
+      after: { label: "2024", value: "17,2%" },
+      deltaNote: "Colombia se acerca al umbral de riesgo financiero catastrófico para los hogares definido por la OMS (20%).",
+      source: "DANE, Cuentas de Salud — citado en informe de la Defensoría del Pueblo sobre la crisis del sistema de salud.",
+      sourceUrl: "https://www.eltiempo.com/amp/justicia/investigacion/informe-de-la-defensoria-revela-cifras-criticas-de-la-salud-disparada-de-tutelas-e-incremento-del-gasto-de-bolsillo-3546107"
+    },
+    {
+      id: "pqrd",
+      title: "PQRD ante la Superintendencia Nacional de Salud",
+      unit: "Tasa por 10.000 afiliados",
+      loopLink: "Variable proxy adicional del nodo 5 (Judicialización y desgaste institucional): un canal administrativo, no judicial, que se mueve en la misma dirección que la tutela.",
+      before: { label: "Nov-2024", value: "322,0" },
+      after: { label: "Nov-2025", value: "420,8" },
+      deltaNote: "+30,7% en 12 meses; Supersalud atribuye el alza a fallas estructurales del modelo, no a EPS puntuales — el incremento se concentra incluso en EPS no intervenidas.",
+      source: "Superintendencia Nacional de Salud, análisis de PQRD (peticiones, quejas, reclamos y denuncias).",
+      sourceUrl: "https://consultorsalud.com/pqrds-en-colombia-supersalud-fallas-mode-salud/"
+    },
   ],
 
   // ------------------------------------------------------------------
