@@ -257,12 +257,15 @@ p{ margin: 0 0 .8em; }
 .category-block.cat-d{ border-color: var(--chip-d); }
 .category-block.cat-e{ border-color: var(--chip-e); }
 .category-block h4{ font-size:.98rem; margin-bottom:8px; }
-.code-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.code-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px; }
 .code-list li{
-  display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+  display:flex; flex-direction:column; gap:3px;
   font-size:.88rem; color: var(--text);
 }
-.code-list .refs{ flex:none; display:flex; gap:4px; }
+.code-list .refs, .cite-list-inline{
+  font-size:.78rem; color: var(--text-muted); line-height:1.5;
+}
+.code-list .refs a, .cite-list-inline a{ color: var(--primary-2); }
 
 .selective-box{
   background: linear-gradient(135deg, var(--primary-tint), transparent);
@@ -407,6 +410,13 @@ table.studies tr:hover td{ background: var(--surface-2); }
 .data-table-toggle.open .chev{ transform: rotate(180deg); }
 .data-table-panel{ margin-top:10px; }
 .data-table-note{ font-size:.76rem; color: var(--text-muted); margin:0 0 8px; }
+.data-table-actions{ display:flex; justify-content:flex-end; margin-bottom:8px; }
+.csv-download{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:.74rem; font-weight:700; color: var(--primary-2);
+  text-decoration:none; border:1px solid var(--primary-2); border-radius:7px; padding:4px 9px;
+}
+.csv-download:hover{ background: var(--primary-tint); }
 table.data-table{ width:100%; border-collapse: collapse; font-size:.8rem; min-width: 480px; }
 table.data-table th{
   text-align:left; background: var(--surface-2); padding: 8px 10px; font-size:.7rem;

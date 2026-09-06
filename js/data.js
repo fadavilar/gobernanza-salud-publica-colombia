@@ -195,7 +195,35 @@ const DATA = {
       callouts: [
         { index: 2, text: "2020: 47.773.868 afiliados activos ÷ 50.390.790 habitantes proyectados = 94,8% — la cobertura cede ~2 puntos frente a 2018-2019, coincidiendo con la pandemia y con procesos de depuración de bases de afiliados." },
         { index: 7, text: "2025: 52.094.265 afiliados activos ÷ 53.057.212 habitantes proyectados = 98,2% — prácticamente universal y estable desde 2022, lo que refuerza que la crisis documentada en esta revisión es de gobernanza y calidad, no de acceso formal al aseguramiento." },
-      ]
+      ],
+      // Desagregación del numerador (afiliados activos) por EPS, corte dic-2025.
+      // Es un subconjunto curado (las mismas 17 EPS analizadas en giros-adres),
+      // no el listado completo de las ~74 entidades activas ese año — la suma
+      // de esta tabla NO reproduce el numerador nacional de la fila 2025.
+      epsBreakdown: {
+        note: "Desagregación del numerador (afiliados activos, no de la cobertura %) para las 17 EPS analizadas en esta revisión — no es el listado completo de las ~74 entidades con afiliados activos en 2025, así que estas cifras no deben sumarse para reconstruir el total nacional de la fila 2025.",
+        columnLabel: "Afiliados activos (dic-2025, BDUA)",
+        rows: [
+          { eps: "Nueva EPS", afiliados: 11589441, intervenida: true },
+          { eps: "EPS SURA", afiliados: 5474957 },
+          { eps: "Sanitas", afiliados: 5915452 },
+          { eps: "Salud Total", afiliados: 5260560 },
+          { eps: "Coosalud", afiliados: 3353615, intervenida: true },
+          { eps: "Famisanar", afiliados: 2607546 },
+          { eps: "Mutual Ser", afiliados: 2686208, intervenida: true },
+          { eps: "Compensar", afiliados: 1759636 },
+          { eps: "Asmet Salud", afiliados: 1585947, intervenida: true },
+          { eps: "SaviaSalud (Alianza Medellín Antioquia)", afiliados: 1673859, intervenida: true },
+          { eps: "Emssanar", afiliados: 1671574, intervenida: true },
+          { eps: "Capital Salud", afiliados: 1125097 },
+          { eps: "SOS (Servicio Occidental de Salud)", afiliados: 741843 },
+          { eps: "Asociación Indígena del Cauca (AIC)", afiliados: 257361, especial: true },
+          { eps: "Aliansalud EPS", afiliados: 248679 },
+          { eps: "Capresoca", afiliados: 167371, intervenida: true },
+          { eps: "Fondo de Pasivo Social Ferrocarriles", afiliados: 27923, especial: true },
+        ],
+        source: { label: "SISPRO — Cubo de Afiliados (BDUA). Afiliados en estado \"Activo\", corte de diciembre de 2025. Acceso institucional del autor; sin URL pública de consulta directa.", url: null },
+      }
     },
     {
       id: "eps-activas-bdua",

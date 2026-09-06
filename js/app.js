@@ -52,7 +52,9 @@
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   }
   function studyRefs(nums){
-    return el("span", {class:"refs"}, nums.map(n => el("span", {class:"study-ref", title:"Estudio #"+n}, [String(n)])));
+    const span = el("span", {class:"refs"});
+    span.innerHTML = inlineCitations(nums);
+    return span;
   }
   function levelClass(level){
     const l = (level||"").toLowerCase();
@@ -333,28 +335,55 @@
   function escapeXML(s){
     return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
-  /* ---------------- APA 7 citation from a study record ---------------- */
-  function apaCitation(study){
+  /* ---------------- APA 7: in-text citation vs. full reference ---------------- */
+  function splitAuthorYear(study){
     // study.author looks like "Apellido et al., 2026" or "Name & Name, 2023 (nota)"
     const m = study.author.match(/^(.*),\s*(\d{4})\s*(.*)$/);
-    const name = m ? m[1].trim() : study.author;
-    const year = m ? m[2] : "";
-    const extra = m && m[3] ? m[3].trim() : "";
-    const text = `${escapeXML(name)} (${escapeXML(year)})${extra ? " "+escapeXML(extra) : ""}. ${escapeXML(study.title)}. ${escapeXML(study.journal)}.`;
+    return {
+      name: m ? m[1].trim() : study.author,
+      year: m ? m[2] : "",
+      extra: m && m[3] ? m[3].trim() : "",
+    };
+  }
+  // Short in-text citation, e.g. "Arias-Monsalve & Restrepo-Zea, 2023" — for
+  // use inline wherever a study is referenced (diagram callouts, category codes).
+  function apaInText(study){
+    const { name, year, extra } = splitAuthorYear(study);
+    const text = `${name}, ${year}${extra ? " "+extra : ""}`;
     return { text, url: study.url || null };
+  }
+  // Full APA 7 reference entry (author, year, title, journal, URL spelled out)
+  // — for use in the References / Estudios incluidos list.
+  function apaCitationPlain(study){
+    const { name, year, extra } = splitAuthorYear(study);
+    let text = `${name} (${year})${extra ? " "+extra : ""}. ${study.title}. ${study.journal}.`;
+    if(study.url) text += ` ${study.url}`;
+    return text;
+  }
+  function apaCitation(study){
+    const { name, year, extra } = splitAuthorYear(study);
+    let html = `${escapeXML(name)} (${escapeXML(year)})${extra ? " "+escapeXML(extra) : ""}. ${escapeXML(study.title)}. ${escapeXML(study.journal)}.`;
+    if(study.url) html += ` <a href="${study.url}" target="_blank" rel="noopener">${escapeXML(study.url)}</a>`;
+    return { html };
+  }
+  // Combined inline citation list, e.g. "(Autor, Año; Autor2, Año2)" with each
+  // segment individually hyperlinked — used for multi-study backing.
+  function inlineCitations(nums){
+    const parts = nums.map(n=>{
+      const study = DATA.studies.find(s=>s.n===n);
+      if(!study) return "";
+      const cite = apaInText(study);
+      const t = escapeXML(cite.text);
+      return cite.url ? `<a href="${cite.url}" target="_blank" rel="noopener">${t}</a>` : t;
+    }).filter(Boolean);
+    return parts.length ? "(" + parts.join("; ") + ")" : "";
   }
   /* ---------------- Diagram floating tooltip (nodes + R1/B1 loop tags) ---------------- */
   function nodeTooltipHTML(node){
     let html = `<h5>${escapeXML(node.label)}</h5>`;
     if(node.actors) html += `<p style="color:var(--text-muted)">Actores: ${escapeXML(node.actors)}</p>`;
     if(node.studies && node.studies.length){
-      html += `<p style="margin-bottom:4px">Respaldado por:</p><ul class="cite-list">` +
-        node.studies.map(n=>{
-          const study = DATA.studies.find(s=>s.n===n);
-          if(!study) return "";
-          const cite = apaCitation(study);
-          return `<li>${cite.url ? `<a href="${cite.url}" target="_blank" rel="noopener">${cite.text}</a>` : cite.text}</li>`;
-        }).join("") + `</ul>`;
+      html += `<p>Respaldado por: ${inlineCitations(node.studies)}</p>`;
     } else {
       html += `<p style="color:var(--text-muted)">Nodo de enlace en la narrativa causal (síntesis del autor); no corresponde a un hallazgo numerado individual.</p>`;
     }
@@ -462,15 +491,32 @@
   function fmtNum(n){
     return typeof n === "number" ? n.toLocaleString("es-CO") : n;
   }
-  function renderExpandableTable(columns, rows, note){
+  /* ---------------- CSV export ---------------- */
+  function toCSV(columns, rows){
+    const esc = v => `"${String(v).replace(/"/g,'""')}"`;
+    return [columns.map(esc).join(","), ...rows.map(r=>r.map(esc).join(","))].join("\r\n");
+  }
+  function makeDownloadLink(filename, columns, rows){
+    const csv = toCSV(columns, rows);
+    const blob = new Blob(["﻿"+csv], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    return el("a",{href:url, download:filename, class:"csv-download"},[
+      el("svg",{viewBox:"0 0 24 24",fill:"none",width:"14",height:"14",html:'<path d="M12 4v11m0 0l-4-4m4 4l4-4M5 19h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'}),
+      "Descargar CSV",
+    ]);
+  }
+  function renderExpandableTable(columns, rows, note, filename){
     const wrap = el("div",{class:"data-table-toggle-wrap"});
     const btn = el("button",{class:"data-table-toggle", type:"button","aria-expanded":"false"},[
-      el("span",{},["Ver datos (numerador y denominador)"]),
+      el("span",{},["Ver datos"]),
       el("svg",{class:"chev",viewBox:"0 0 24 24",fill:"none",html:'<path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'}),
     ]);
     const panel = el("div",{class:"data-table-panel"});
     panel.hidden = true;
     if(note) panel.appendChild(el("p",{class:"data-table-note"},[note]));
+    panel.appendChild(el("div",{class:"data-table-actions"},[
+      makeDownloadLink(filename||"datos.csv", columns, rows)
+    ]));
     const tableWrap = el("div",{class:"table-wrap"});
     const table = el("table",{class:"data-table"},[
       el("thead",{},[ el("tr",{},columns.map(c=>el("th",{},[c]))) ]),
@@ -497,12 +543,16 @@
       if(hasNumDen) return [String(label), fmtNum(ind.numerators[i]), fmtNum(ind.denominators[i]), fmtNum(ind.values[i])];
       return [String(label), fmtNum(ind.values[i])];
     });
-    return { columns, rows, note: "Unidad de la columna Valor: "+ind.unit };
+    const note = hasNumDen
+      ? "Unidad de la columna Valor: "+ind.unit
+      : "Indicador ya calculado en la fuente citada (unidad: "+ind.unit+") — no se dispone de numerador y denominador desagregados para reconstruirlo.";
+    return { columns, rows, note };
   }
   function buildComparisonTable(ind){
     return {
       columns: ["Periodo", "Valor"],
-      rows: [ [ind.before.label, ind.before.value], [ind.after.label, ind.after.value] ]
+      rows: [ [ind.before.label, ind.before.value], [ind.after.label, ind.after.value] ],
+      note: "Indicador ya calculado en la fuente citada — no se dispone de numerador y denominador desagregados para reconstruirlo.",
     };
   }
   function buildEpsRatioTable(ind){
@@ -520,6 +570,13 @@
       fmtNum(r.ratio),
     ]);
     return { columns, rows, note: (ind.epsRatioNote||"") + " (⚠ bajo intervención/vigilancia especial en 2023-2025 · ✱ régimen especial o fondo de pequeño tamaño, denominador atípico)" };
+  }
+  function buildEpsBreakdownTable(bk){
+    const rows = [...bk.rows].sort((a,b)=> b.afiliados - a.afiliados).map(r=>[
+      r.eps + (r.intervenida?" ⚠":"") + (r.especial?" ✱":""),
+      fmtNum(r.afiliados),
+    ]);
+    return { columns: ["EPS", bk.columnLabel], rows, note: bk.note + " (⚠ intervenida/vigilancia especial · ✱ régimen especial o fondo pequeño)" };
   }
   function renderIndicadores(){
     const body = document.getElementById("body-indicadores");
@@ -539,17 +596,25 @@
       (ind.callouts||[]).forEach(c=> callBox.appendChild(el("div",{class:"callout"},[c.text])));
       block.appendChild(callBox);
       block.appendChild(renderSources(ind));
+      const t = buildStandardTable(ind);
+      block.appendChild(renderExpandableTable(t.columns, t.rows, t.note, ind.id+"_datos.csv"));
       if(ind.epsRatioTable && ind.epsRatioTable.length){
-        const t = buildEpsRatioTable(ind);
-        block.appendChild(renderExpandableTable(t.columns, t.rows, t.note));
+        const rt = buildEpsRatioTable(ind);
+        block.appendChild(renderExpandableTable(rt.columns, rt.rows, rt.note, ind.id+"_por_eps.csv"));
         if(ind.epsAfiliadosSource){
           const src = renderSources({ sources: [ind.epsAfiliadosSource] });
           src.style.marginTop = "6px";
           block.appendChild(src);
         }
-      } else {
-        const t = buildStandardTable(ind);
-        block.appendChild(renderExpandableTable(t.columns, t.rows, t.note));
+      }
+      if(ind.epsBreakdown){
+        const bt = buildEpsBreakdownTable(ind.epsBreakdown);
+        block.appendChild(renderExpandableTable(bt.columns, bt.rows, bt.note, ind.id+"_por_eps.csv"));
+        if(ind.epsBreakdown.source){
+          const src = renderSources({ sources: [ind.epsBreakdown.source] });
+          src.style.marginTop = "6px";
+          block.appendChild(src);
+        }
       }
       body.appendChild(block);
     });
@@ -577,7 +642,7 @@
         block.appendChild(el("div",{class:"callout"},[ind.deltaNote]));
         block.appendChild(renderSources(ind));
         const t = buildComparisonTable(ind);
-        block.appendChild(renderExpandableTable(t.columns, t.rows));
+        block.appendChild(renderExpandableTable(t.columns, t.rows, t.note, ind.id+"_datos.csv"));
         body.appendChild(block);
       });
     }
@@ -675,7 +740,7 @@
      ============================================================ */
   function renderEstudios(){
     const body = document.getElementById("body-estudios");
-    body.appendChild(el("p",{},["Filtra por base de datos de origen. Toca el título para ver el DOI/URL cuando esté disponible."]));
+    body.appendChild(el("p",{},["Filtra por base de datos de origen. Cada referencia está completa en formato APA 7, con hipervínculo al DOI/URL cuando está disponible."]));
 
     const dbs = ["Todas", ...Array.from(new Set(DATA.studies.map(s=>s.db)))];
     const filterRow = el("div",{class:"filter-row"});
@@ -688,12 +753,17 @@
       });
       filterRow.appendChild(chip);
     });
-    body.appendChild(filterRow);
+    const actions = el("div",{class:"data-table-actions", style:"flex:1"});
+    actions.appendChild(makeDownloadLink("estudios_incluidos.csv",
+      ["#","Referencia (APA 7)","Tipo","Resultado principal","Base"],
+      DATA.studies.map(s=>[String(s.n), apaCitationPlain(s), s.type, s.result, s.db])
+    ));
+    body.appendChild(el("div",{style:"display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px"},[filterRow, actions]));
 
     const tableWrap = el("div",{class:"table-wrap"});
     const table = el("table",{class:"studies", id:"studies-table"},[
       el("thead",{},[ el("tr",{},[
-        el("th",{},["#"]), el("th",{},["Estudio"]), el("th",{},["Autor / año"]),
+        el("th",{},["#"]), el("th",{},["Referencia (APA 7)"]),
         el("th",{},["Tipo"]), el("th",{},["Resultado principal"]), el("th",{},["Base"]),
       ])]),
       el("tbody",{id:"studies-tbody"}),
@@ -706,13 +776,11 @@
     const tbody = document.getElementById("studies-tbody");
     tbody.innerHTML = "";
     DATA.studies.filter(s=> filterDb==="Todas" || s.db===filterDb).forEach(s=>{
-      const titleCell = s.url
-        ? el("a",{href:s.url, target:"_blank", rel:"noopener"},[s.title])
-        : el("span",{},[s.title]);
+      const refCell = el("td",{style:"max-width:360px"});
+      refCell.innerHTML = apaCitation(s).html;
       tbody.appendChild(el("tr",{},[
         el("td",{},[el("span",{class:"study-ref"},[String(s.n)])]),
-        el("td",{style:"max-width:260px"},[titleCell]),
-        el("td",{style:"white-space:nowrap"},[s.author]),
+        refCell,
         el("td",{},[s.type]),
         el("td",{style:"min-width:220px"},[s.result]),
         el("td",{},[el("span",{class:"db-badge"},[s.db])]),
