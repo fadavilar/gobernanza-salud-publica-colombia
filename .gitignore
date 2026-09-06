@@ -1,0 +1,13 @@
+# Raw literature-search exports and working manuscript — kept local only.
+# The manuscript is in preparation for journal submission; the app publishes
+# only a curated synthesis (see js/data.js), not the full source documents.
+*.csv
+*.ris
+*.docx
+ese_indicadores_notas.md
+ImplementationResearchCourse_v*.txt
+Module1_Chapter_*.pdf
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
