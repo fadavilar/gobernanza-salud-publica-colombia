@@ -535,6 +535,11 @@
     return wrap;
   }
   function buildStandardTable(ind){
+    if(Array.isArray(ind.series) && ind.series.length){
+      const columns = ["Periodo", ...ind.series.map(s=>s.name)];
+      const rows = ind.labels.map((label,i)=> [String(label), ...ind.series.map(s=>fmtNum(s.data[i]))]);
+      return { columns, rows, note: "Unidad: "+ind.unit+" — cada columna es una dimensión/política FURAG independiente, ya calculada en la fuente." };
+    }
     const hasNumDen = ind.numerators && ind.denominators;
     const columns = hasNumDen
       ? ["Periodo", ind.numeratorLabel||"Numerador", ind.denominatorLabel||"Denominador", "Valor"]
@@ -591,13 +596,28 @@
       ]));
       block.appendChild(el("div",{class:"indicator-linklet"},[ind.loopLink]));
       const chartBox = el("div",{class:"chart-box"},[ el("canvas",{id:"chart-"+ind.id}) ]);
+      if(Array.isArray(ind.series) && ind.series.length) chartBox.style.height = "300px";
       block.appendChild(chartBox);
       const callBox = el("div",{class:"indicator-callouts"});
       (ind.callouts||[]).forEach(c=> callBox.appendChild(el("div",{class:"callout"},[c.text])));
       block.appendChild(callBox);
+      if(ind.scope || (ind.limitations && ind.limitations.length)){
+        const sl = el("div",{class:"scope-limits"});
+        if(ind.scope) sl.appendChild(el("p",{class:"scope-text"},[el("strong",{},["Alcance: "]), ind.scope]));
+        if(ind.limitations && ind.limitations.length){
+          sl.appendChild(el("p",{class:"scope-text", style:"margin:8px 0 4px"},[el("strong",{},["Limitaciones:"])]));
+          const ul = el("ul",{class:"limit-list-compact"});
+          ind.limitations.forEach(l=> ul.appendChild(el("li",{},[l])));
+          sl.appendChild(ul);
+        }
+        block.appendChild(sl);
+      }
       block.appendChild(renderSources(ind));
       const t = buildStandardTable(ind);
       block.appendChild(renderExpandableTable(t.columns, t.rows, t.note, ind.id+"_datos.csv"));
+      if(ind.detailItems){
+        block.appendChild(renderExpandableTable(ind.detailItems.columns, ind.detailItems.rows, ind.detailItems.note, ind.id+"_detalle.csv"));
+      }
       if(ind.epsRatioTable && ind.epsRatioTable.length){
         const rt = buildEpsRatioTable(ind);
         block.appendChild(renderExpandableTable(rt.columns, rt.rows, rt.note, ind.id+"_por_eps.csv"));
@@ -656,11 +676,18 @@
       const gridColor = cssVar("--border") || "#e1e6ee";
       const textColor = cssVar("--text-muted") || "#57667a";
       const primary = cssVar("--primary-2") || "#147a86";
-      chartInstances[ind.id] = new Chart(canvas.getContext("2d"), {
-        type: "line",
-        data: {
-          labels: ind.labels,
-          datasets: [{
+      const isMulti = !!(Array.isArray(ind.series) && ind.series.length);
+      const palette = [primary, cssVar("--accent")||"#c4711f", cssVar("--danger")||"#b3241c", cssVar("--chip-e")||"#3a5a9c", cssVar("--success")||"#226b4a"];
+      const datasets = isMulti
+        ? ind.series.map((s,i)=>({
+            label: s.name,
+            data: s.data,
+            borderColor: palette[i%palette.length],
+            backgroundColor: palette[i%palette.length]+"22",
+            pointBackgroundColor: palette[i%palette.length],
+            pointRadius: 4, pointHoverRadius: 6, fill: false, tension: .25,
+          }))
+        : [{
             data: ind.values,
             borderColor: primary,
             backgroundColor: primary+"33",
@@ -669,17 +696,21 @@
             pointHoverRadius: 6,
             fill: true,
             tension: .3,
-          }]
-        },
+          }];
+      chartInstances[ind.id] = new Chart(canvas.getContext("2d"), {
+        type: "line",
+        data: { labels: ind.labels, datasets },
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: {
-            legend: { display:false },
+            legend: { display: isMulti, position: "bottom", labels: { color: textColor, font:{size:10.5}, boxWidth:12 } },
             tooltip: {
               callbacks: {
-                label: (ctx)=> ind.unit + ": " + ctx.parsed.y.toLocaleString("es-CO"),
+                label: (ctx)=> isMulti
+                  ? (ctx.dataset.label + ": " + ctx.parsed.y.toLocaleString("es-CO"))
+                  : (ind.unit + ": " + ctx.parsed.y.toLocaleString("es-CO")),
                 afterLabel: (ctx)=>{
-                  if(!ind.numerators || !ind.denominators) return null;
+                  if(isMulti || !ind.numerators || !ind.denominators) return null;
                   const num = ind.numerators[ctx.dataIndex], den = ind.denominators[ctx.dataIndex];
                   if(num == null || den == null) return null;
                   return [

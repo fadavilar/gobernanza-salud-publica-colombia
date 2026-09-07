@@ -9,6 +9,7 @@
 *.pdf
 ese_indicadores_notas.md
 ImplementationResearchCourse_v*.txt
+Claude outputs/
 
 # OS / editor cruft
 .DS_Store
