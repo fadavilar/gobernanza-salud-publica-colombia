@@ -332,6 +332,87 @@
     if(cur) lines.push(cur);
     return lines;
   }
+  function buildPrismaSVG(prisma){
+    const svgNS = "http://www.w3.org/2000/svg";
+    const W = 700, H = 540;
+    const boxW = 310, sideW = 220, sideX = 430;
+    const mainX = 45;
+    const rowY = { found: 24, removed: 132, screened: 240, included: 386 };
+    const rowH = { found: 76, removed: 72, screened: 96, included: 88 };
+
+    const svg = document.createElementNS(svgNS,"svg");
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.setAttribute("width","100%");
+    svg.setAttribute("role","img");
+    svg.setAttribute("aria-label","Diagrama de flujo PRISMA de selección de estudios");
+
+    const defs = document.createElementNS(svgNS,"defs");
+    defs.innerHTML = `
+      <marker id="parrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="context-stroke"></path>
+      </marker>`;
+    svg.appendChild(defs);
+
+    function box(x,y,w,h,lines,nText,extraClass){
+      const g = document.createElementNS(svgNS,"g");
+      g.setAttribute("class","prisma-box"+(extraClass?" "+extraClass:""));
+      let html = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10"></rect>`;
+      html += `<text x="${x+14}" y="${y+22}" class="prisma-n">${escapeXML(nText)}</text>`;
+      lines.forEach((l,i)=>{
+        html += `<text x="${x+14}" y="${y+40+i*14}" class="prisma-label">${escapeXML(l)}</text>`;
+      });
+      g.innerHTML = html;
+      svg.appendChild(g);
+    }
+    function arrowV(x,y1,y2){
+      const p = document.createElementNS(svgNS,"path");
+      p.setAttribute("d", `M ${x} ${y1} L ${x} ${y2}`);
+      p.setAttribute("class","edge-path prisma-arrow");
+      p.setAttribute("marker-end","url(#parrow)");
+      svg.appendChild(p);
+    }
+    function arrowH(x1,x2,y){
+      const p = document.createElementNS(svgNS,"path");
+      p.setAttribute("d", `M ${x1} ${y} L ${x2} ${y}`);
+      p.setAttribute("class","edge-path prisma-arrow");
+      p.setAttribute("marker-end","url(#parrow)");
+      svg.appendChild(p);
+    }
+    function stageLabel(y1,y2,text){
+      const t = document.createElementNS(svgNS,"text");
+      const cy = (y1+y2)/2;
+      t.setAttribute("x", 0); t.setAttribute("y", 0);
+      t.setAttribute("class","prisma-stage");
+      t.setAttribute("text-anchor","middle");
+      t.setAttribute("transform", `translate(14 ${cy}) rotate(-90)`);
+      t.textContent = text;
+      svg.appendChild(t);
+    }
+
+    const idf = prisma.identification, scr = prisma.screening, inc = prisma.included;
+
+    stageLabel(rowY.found, rowY.removed+rowH.removed, "Identificación");
+    box(mainX, rowY.found, boxW, rowH.found,
+      wrapLabel(idf.found.breakdown, 40), `Registros identificados (n = ${idf.found.n})`);
+    arrowV(mainX+boxW/2, rowY.found+rowH.found, rowY.removed);
+    box(mainX, rowY.removed, boxW, rowH.removed,
+      wrapLabel(idf.removedBeforeScreening.breakdown, 40), `Eliminados antes del cribado (n = ${idf.removedBeforeScreening.n})`);
+
+    arrowV(mainX+boxW/2, rowY.removed+rowH.removed, rowY.screened);
+    stageLabel(rowY.screened, rowY.screened+rowH.screened, "Cribado");
+    box(mainX, rowY.screened, boxW, rowH.screened,
+      wrapLabel(scr.screened.breakdown, 40), `Registros únicos cribados (n = ${scr.screened.n})`);
+    arrowH(mainX+boxW, sideX+2, rowY.screened+rowH.screened/2);
+    box(sideX, rowY.screened, sideW, rowH.screened,
+      wrapLabel(scr.excluded.breakdown, 30), `Excluidos (n = ${scr.excluded.n})`, "prisma-excluded");
+
+    arrowV(mainX+boxW/2, rowY.screened+rowH.screened, rowY.included);
+    stageLabel(rowY.included, rowY.included+rowH.included, "Incluidos");
+    box(mainX, rowY.included, boxW, rowH.included,
+      wrapLabel(inc.breakdown, 40), `Estudios incluidos a texto completo (n = ${inc.n})`, "prisma-included");
+
+    return svg;
+  }
   function escapeXML(s){
     return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
@@ -843,6 +924,12 @@
       el("div",{class:"pcc-card"},[el("div",{class:"k"},["Contexto"]), el("p",{},[m.pcc.context])]),
     ]);
     body.appendChild(pccGrid);
+
+    body.appendChild(el("h4",{style:"font-size:.86rem;margin-top:20px"},["Diagrama de flujo PRISMA"]));
+    const prismaWrap = el("div",{class:"diagram-wrap"});
+    prismaWrap.appendChild(buildPrismaSVG(m.prisma));
+    body.appendChild(prismaWrap);
+    body.appendChild(el("p",{class:"indicator-source", style:"margin-top:8px"},[m.prisma.citation]));
 
     body.appendChild(el("h4",{style:"font-size:.86rem;margin-top:6px"},["Bases consultadas"]));
     const dbRow = el("div",{class:"tag-row"});

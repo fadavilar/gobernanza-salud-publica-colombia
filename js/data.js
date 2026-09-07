@@ -480,6 +480,20 @@ const DATA = {
       concept: "Modelos de gestión pública, gobernanza y rectoría (stewardship) en salud.",
       context: "Sistema General de Seguridad Social en Salud (SGSSS) de Colombia."
     },
+    prisma: {
+      citation: "Adaptado de Haddaway, N. R., Page, M. J., Pritchard, C. C., & McGuinness, L. A. (2022). PRISMA2020: An R package and Shiny app for producing PRISMA 2020-compliant flow diagrams. Campbell Systematic Reviews, 18, e1230.",
+      identification: {
+        found: { n: 329, breakdown: "PubMed 16 · Embase 240 · LILACS/BVS 65 · Google Scholar 8" },
+        removedBeforeScreening: { n: 48, breakdown: "11 duplicados internos (LILACS/BVS) + 37 duplicados cruzados entre bases" },
+      },
+      screening: {
+        screened: { n: 281, breakdown: "Cribado por título y resumen" },
+        excluded: { n: 264, breakdown: "Falsos positivos de \"stewardship\" clínico, fuera de alcance temático o geográfico" },
+      },
+      included: {
+        n: 17, breakdown: "PubMed 6 · Embase 5 · LILACS/BVS 3 · Google Scholar 3",
+      },
+    },
     databases: ["PubMed/MEDLINE", "Embase", "LILACS/BVS", "Google Scholar", "Literatura gris institucional (MinSalud, DNP, Supersalud, OPS/OMS, Banco Mundial, CEPAL)"],
     qualityTools: ["STROBE (transversales)", "SRQR y COREQ (cualitativos)", "PRISMA 2020 (revisión integrativa)", "SANRA (revisiones narrativas)", "AACODS (literatura gris)"],
     limitations: [
