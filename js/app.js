@@ -185,7 +185,10 @@
 
     const wrap = el("div",{class:"diagram-wrap"});
     wrap.appendChild(buildCausalSVG());
-    wrap.appendChild(el("div",{class:"diagram-tooltip",id:"diagram-tooltip",hidden:"hidden"}));
+    const tooltipEl = el("div",{class:"diagram-tooltip",id:"diagram-tooltip",hidden:"hidden"});
+    tooltipEl.addEventListener("mouseenter", cancelHideTooltip);
+    tooltipEl.addEventListener("mouseleave", scheduleHideTooltip);
+    wrap.appendChild(tooltipEl);
     body.appendChild(wrap);
 
     body.appendChild(el("div",{class:"loop-legend"},[
@@ -319,7 +322,7 @@
       svg.appendChild(g);
     });
 
-    svg.addEventListener("mouseleave", hideDiagramTooltip);
+    svg.addEventListener("mouseleave", scheduleHideTooltip);
     return svg;
   }
   function wrapLabel(text, maxChars){
@@ -507,6 +510,7 @@
   }
   function attachNodeTooltip(gEl, node){
     const show = ()=>{
+      cancelHideTooltip();
       document.querySelectorAll(".node-box, .loop-tag-group").forEach(n=>n.classList.remove("active"));
       gEl.classList.add("active");
       showDiagramTooltip(gEl, nodeTooltipHTML(node));
@@ -516,6 +520,7 @@
   }
   function attachLoopTooltip(gEl, loop){
     const show = ()=>{
+      cancelHideTooltip();
       document.querySelectorAll(".node-box, .loop-tag-group").forEach(n=>n.classList.remove("active"));
       gEl.classList.add("active");
       showDiagramTooltip(gEl, loopTooltipHTML(loop));
@@ -548,6 +553,14 @@
     const tooltip = document.getElementById("diagram-tooltip");
     if(tooltip) tooltip.hidden = true;
     document.querySelectorAll(".node-box, .loop-tag-group").forEach(n=>n.classList.remove("active"));
+  }
+  let tooltipHideTimer = null;
+  function scheduleHideTooltip(){
+    clearTimeout(tooltipHideTimer);
+    tooltipHideTimer = setTimeout(hideDiagramTooltip, 300);
+  }
+  function cancelHideTooltip(){
+    clearTimeout(tooltipHideTimer);
   }
 
   /* ============================================================

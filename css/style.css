@@ -326,15 +326,16 @@ p{ margin: 0 0 .8em; }
 
 /* Floating callout for node/loop hover, anchored inside .diagram-wrap */
 .diagram-tooltip{
-  position:absolute; z-index: 20; max-width: 280px;
+  position:absolute; z-index: 20; max-width: 280px; max-height: 320px; overflow-y:auto;
   background: var(--surface); border:1px solid var(--primary-2); border-radius: 12px;
   padding: 12px 14px; box-shadow: var(--shadow-lg); font-size:.82rem;
-  pointer-events:none; transition: opacity .12s ease;
+  pointer-events:auto; transition: opacity .12s ease;
 }
 .diagram-tooltip[hidden]{ display:none; }
 .diagram-tooltip h5{ margin:0 0 4px; font-size:.88rem; }
 .diagram-tooltip p{ margin:0 0 6px; }
 .diagram-tooltip p:last-child{ margin-bottom:0; }
+.diagram-tooltip a{ color: var(--primary-2); cursor:pointer; }
 .diagram-tooltip .initiatives{ display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
 .tag-pill{
   font-size:.74rem; padding:3px 9px; border-radius:999px; background: var(--surface-2); color: var(--text-muted);
