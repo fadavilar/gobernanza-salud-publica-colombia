@@ -38,4 +38,4 @@ Para editar contenido, generalmente basta con modificar `js/data.js`; el resto s
 
 ## Autor
 
-Fabian Dávila Ramírez, MD, MBA, PhD — Universidad de Navarra
+Fabian Dávila Ramírez, MD, MBA, PhD — Universidad de Navarra · Universidad de Bogotá Jorge Tadeo Lozano (Doctorado en Gestión y Modelado de Políticas Públicas)

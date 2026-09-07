@@ -12,7 +12,7 @@ const DATA = {
     subtitle: "Explorador interactivo del diagnóstico causal, la evidencia y las recomendaciones",
     author: "Fabian Dávila Ramírez",
     credentials: "MD, MBA, PhD",
-    affiliation: "Universidad de Navarra",
+    affiliation: "Universidad de Navarra · Universidad de Bogotá Jorge Tadeo Lozano (Doctorado en Gestión y Modelado de Políticas Públicas)",
     period: "Evidencia académica 2021–2026",
     framework: "Revisión de alcance · marco PCC (Población–Concepto–Contexto)",
     disclaimer: "Esta aplicación resume el diagnóstico y los hallazgos centrales de una revisión de alcance más extensa, actualmente en preparación para publicación. Por esa razón se presenta aquí una síntesis infográfica y no el manuscrito completo. Las recomendaciones y la lectura desde investigación de implementación son una elaboración propia del autor a partir del diagnóstico causal, no hallazgos textuales de los estudios incluidos.",
