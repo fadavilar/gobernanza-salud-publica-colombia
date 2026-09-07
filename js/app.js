@@ -561,16 +561,18 @@
     };
   }
   function buildEpsRatioTable(ind){
-    const columns = ["EPS", "Meses con dato", "Giro total del periodo (COP)", "Afiliados (dic-2025, BDUA)", ind.epsRatioLabel];
+    const columns = ["EPS", "Meses con dato", "Giro bruto del periodo (COP)", "Giro núcleo UPC/LMA (COP)", "% núcleo", "Afiliados (dic-2025, BDUA)", ind.epsRatioLabel];
     const computed = ind.epsRatioTable.map(r=>{
-      const anualizado = (r.giroTotal / r.meses) * 12;
+      const anualizado = (r.giroCore / r.meses) * 12;
       const ratio = Math.round(anualizado / r.afiliados2025);
       return { ...r, ratio };
     }).sort((a,b)=> b.ratio - a.ratio);
     const rows = computed.map(r=>[
       r.eps + (r.intervenida ? " ⚠" : "") + (r.especial ? " ✱" : ""),
       String(r.meses),
-      fmtNum(r.giroTotal),
+      fmtNum(r.giroBruto),
+      fmtNum(r.giroCore),
+      (100*r.giroCore/r.giroBruto).toFixed(1)+"%",
       fmtNum(r.afiliados2025),
       fmtNum(r.ratio),
     ]);
