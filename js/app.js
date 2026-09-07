@@ -418,8 +418,9 @@
     p.excludedReasons.forEach(r=> wrapLabel(r, 40).forEach((l,i)=> excludedLines.push((i===0?"– ":"   ")+l)));
     const hD = box(sideX, y, sideW, `Registros excluidos (n = ${p.excludedTotal})`, excludedLines, "prisma-removed");
     arrowH(mainX+boxW, sideX-2, y + hC/2);
-    const row2Bottom = y + Math.max(hC, hD);
-    y = row2Bottom + 26;
+    const row2MainBottom = y + hC;
+    const row2MaxBottom = y + Math.max(hC, hD);
+    y = row2MaxBottom + 26;
 
     // Row 3: included
     const includedLines = p.includedByDb.map(d=>`${d.label}: ${d.n}`);
@@ -427,10 +428,10 @@
 
     arrowV(mainX+boxW/2, 4+28, 40);
     arrowV(mainX+boxW/2, row1Bottom, row1Bottom+26);
-    arrowV(mainX+boxW/2, row2Bottom, row2Bottom+26);
+    arrowV(mainX+boxW/2, row2MainBottom, y);
 
     stagePill(40, row1Bottom, "Identificación");
-    stagePill(row1Bottom+26, row2Bottom, "Selección");
+    stagePill(row1Bottom+26, row2MaxBottom, "Selección");
     stagePill(y, y+hE, "Incluidos");
 
     const totalH = y + hE + 16;
