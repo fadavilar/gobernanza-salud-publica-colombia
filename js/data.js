@@ -481,18 +481,34 @@ const DATA = {
       context: "Sistema General de Seguridad Social en Salud (SGSSS) de Colombia."
     },
     prisma: {
-      citation: "Adaptado de Haddaway, N. R., Page, M. J., Pritchard, C. C., & McGuinness, L. A. (2022). PRISMA2020: An R package and Shiny app for producing PRISMA 2020-compliant flow diagrams. Campbell Systematic Reviews, 18, e1230.",
-      identification: {
-        found: { n: 329, breakdown: "PubMed 16 · Embase 240 · LILACS/BVS 65 · Google Scholar 8" },
-        removedBeforeScreening: { n: 48, breakdown: "11 duplicados internos (LILACS/BVS) + 37 duplicados cruzados entre bases" },
-      },
-      screening: {
-        screened: { n: 281, breakdown: "Cribado por título y resumen" },
-        excluded: { n: 264, breakdown: "Falsos positivos de \"stewardship\" clínico, fuera de alcance temático o geográfico" },
-      },
-      included: {
-        n: 17, breakdown: "PubMed 6 · Embase 5 · LILACS/BVS 3 · Google Scholar 3",
-      },
+      citation: "Adaptado de Page, M. J. et al. (2021). The PRISMA 2021 statement. BMJ, 372, n71; y de Haddaway, N. R. et al. (2022). PRISMA2020: An R package and Shiny app for producing PRISMA 2020-compliant flow diagrams. Campbell Systematic Reviews, 18, e1230.",
+      identifiedTotal: 329,
+      identifiedByDb: [
+        { label: "PubMed/MEDLINE", n: 16 },
+        { label: "Embase", n: 240 },
+        { label: "LILACS/BVS", n: 65 },
+        { label: "Google Scholar", n: 8 },
+      ],
+      removedTotal: 48,
+      removedBreakdown: [
+        { label: "Duplicados internos (LILACS/BVS)", n: 11 },
+        { label: "Duplicados cruzados entre bases", n: 37 },
+      ],
+      screenedTotal: 281,
+      excludedTotal: 264,
+      excludedReasons: [
+        "Falsos positivos por explosión Emtree/MeSH de \"stewardship\" (programas clínicos)",
+        "Temas clínicos o de manejo de enfermedad sin componente de gestión pública",
+        "Otro país, con Colombia presente solo en la filiación de los autores",
+        "Versión bilingüe duplicada de un estudio ya contabilizado",
+      ],
+      includedTotal: 17,
+      includedByDb: [
+        { label: "PubMed/MEDLINE", n: 6 },
+        { label: "Embase", n: 5 },
+        { label: "LILACS/BVS", n: 3 },
+        { label: "Google Scholar", n: 3 },
+      ],
     },
     databases: ["PubMed/MEDLINE", "Embase", "LILACS/BVS", "Google Scholar", "Literatura gris institucional (MinSalud, DNP, Supersalud, OPS/OMS, Banco Mundial, CEPAL)"],
     qualityTools: ["STROBE (transversales)", "SRQR y COREQ (cualitativos)", "PRISMA 2020 (revisión integrativa)", "SANRA (revisiones narrativas)", "AACODS (literatura gris)"],

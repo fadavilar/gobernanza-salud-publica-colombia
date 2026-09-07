@@ -332,17 +332,14 @@
     if(cur) lines.push(cur);
     return lines;
   }
-  function buildPrismaSVG(prisma){
+  function buildPrismaSVG(p){
     const svgNS = "http://www.w3.org/2000/svg";
-    const W = 700, H = 540;
-    const boxW = 310, sideW = 220, sideX = 430;
-    const mainX = 45;
-    const rowY = { found: 24, removed: 132, screened: 240, included: 386 };
-    const rowH = { found: 76, removed: 72, screened: 96, included: 88 };
+    const mainX = 88, boxW = 300, gapX = 30;
+    const sideX = mainX + boxW + gapX, sideW = 250;
+    const stageX = 8, stageW = 42;
+    const lineH = 14.5, padTop = 24, padBottom = 12;
 
     const svg = document.createElementNS(svgNS,"svg");
-    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-    svg.setAttribute("width","100%");
     svg.setAttribute("role","img");
     svg.setAttribute("aria-label","Diagrama de flujo PRISMA de selección de estudios");
 
@@ -353,64 +350,93 @@
       </marker>`;
     svg.appendChild(defs);
 
-    function box(x,y,w,h,lines,nText,extraClass){
+    // box(): title bold line(s) + detail lines; returns the box's total height
+    function box(x, y, w, title, detailLines, extraClass){
+      const titleLines = wrapLabel(title, Math.floor(w/6.1));
+      const detailY0 = 16 + titleLines.length*13 + 6;
+      const h = detailY0 + detailLines.length*lineH + padBottom - 4;
       const g = document.createElementNS(svgNS,"g");
       g.setAttribute("class","prisma-box"+(extraClass?" "+extraClass:""));
-      let html = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10"></rect>`;
-      html += `<text x="${x+14}" y="${y+22}" class="prisma-n">${escapeXML(nText)}</text>`;
-      lines.forEach((l,i)=>{
-        html += `<text x="${x+14}" y="${y+40+i*14}" class="prisma-label">${escapeXML(l)}</text>`;
+      let html = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8"></rect>`;
+      html += titleLines.map((l,i)=>
+        `<text x="${x+12}" y="${y+16+i*13}" class="prisma-title">${escapeXML(l)}</text>`
+      ).join("");
+      detailLines.forEach((l,i)=>{
+        html += `<text x="${x+12}" y="${y+detailY0+i*lineH}" class="prisma-label">${escapeXML(l)}</text>`;
       });
       g.innerHTML = html;
       svg.appendChild(g);
+      return h;
     }
     function arrowV(x,y1,y2){
-      const p = document.createElementNS(svgNS,"path");
-      p.setAttribute("d", `M ${x} ${y1} L ${x} ${y2}`);
-      p.setAttribute("class","edge-path prisma-arrow");
-      p.setAttribute("marker-end","url(#parrow)");
-      svg.appendChild(p);
+      const el2 = document.createElementNS(svgNS,"path");
+      el2.setAttribute("d", `M ${x} ${y1} L ${x} ${y2}`);
+      el2.setAttribute("class","edge-path prisma-arrow");
+      el2.setAttribute("marker-end","url(#parrow)");
+      svg.appendChild(el2);
     }
     function arrowH(x1,x2,y){
-      const p = document.createElementNS(svgNS,"path");
-      p.setAttribute("d", `M ${x1} ${y} L ${x2} ${y}`);
-      p.setAttribute("class","edge-path prisma-arrow");
-      p.setAttribute("marker-end","url(#parrow)");
-      svg.appendChild(p);
+      const el2 = document.createElementNS(svgNS,"path");
+      el2.setAttribute("d", `M ${x1} ${y} L ${x2} ${y}`);
+      el2.setAttribute("class","edge-path prisma-arrow");
+      el2.setAttribute("marker-end","url(#parrow)");
+      svg.appendChild(el2);
     }
-    function stageLabel(y1,y2,text){
-      const t = document.createElementNS(svgNS,"text");
+    function stagePill(y1,y2,text){
       const cy = (y1+y2)/2;
-      t.setAttribute("x", 0); t.setAttribute("y", 0);
-      t.setAttribute("class","prisma-stage");
-      t.setAttribute("text-anchor","middle");
-      t.setAttribute("transform", `translate(14 ${cy}) rotate(-90)`);
-      t.textContent = text;
-      svg.appendChild(t);
+      const g = document.createElementNS(svgNS,"g");
+      g.setAttribute("class","prisma-stage-pill");
+      g.innerHTML = `
+        <rect x="${stageX}" y="${y1}" width="${stageW}" height="${Math.max(y2-y1,60)}" rx="14"></rect>
+        <text x="0" y="0" class="prisma-stage" text-anchor="middle" transform="translate(${stageX+stageW/2} ${cy}) rotate(-90)">${escapeXML(text)}</text>`;
+      svg.appendChild(g);
+    }
+    function headerPill(x,y,w,text){
+      const g = document.createElementNS(svgNS,"g");
+      g.setAttribute("class","prisma-header-pill");
+      g.innerHTML = `
+        <rect x="${x}" y="${y}" width="${w}" height="28" rx="14"></rect>
+        <text x="${x+w/2}" y="${y+18}" class="prisma-header-text" text-anchor="middle">${escapeXML(text)}</text>`;
+      svg.appendChild(g);
     }
 
-    const idf = prisma.identification, scr = prisma.screening, inc = prisma.included;
+    let y = 40;
+    headerPill(mainX, 4, (sideX+sideW)-mainX, "Identificación de estudios mediante bases de datos");
 
-    stageLabel(rowY.found, rowY.removed+rowH.removed, "Identificación");
-    box(mainX, rowY.found, boxW, rowH.found,
-      wrapLabel(idf.found.breakdown, 40), `Registros identificados (n = ${idf.found.n})`);
-    arrowV(mainX+boxW/2, rowY.found+rowH.found, rowY.removed);
-    box(mainX, rowY.removed, boxW, rowH.removed,
-      wrapLabel(idf.removedBeforeScreening.breakdown, 40), `Eliminados antes del cribado (n = ${idf.removedBeforeScreening.n})`);
+    // Row 1: identified -> removed (side branch)
+    const dbLines = p.identifiedByDb.map(d=>`${d.label}: ${d.n}`);
+    const hA = box(mainX, y, boxW, `Estudios identificados de bases de datos (n = ${p.identifiedTotal})`, dbLines);
+    const removedLines = p.removedBreakdown.map(d=>`${d.label}: ${d.n}`);
+    const hB = box(sideX, y, sideW, `Registros eliminados antes del cribado (n = ${p.removedTotal})`, removedLines, "prisma-removed");
+    arrowH(mainX+boxW, sideX-2, y + hA/2);
+    const row1Bottom = y + hA;
+    y = row1Bottom + 26;
 
-    arrowV(mainX+boxW/2, rowY.removed+rowH.removed, rowY.screened);
-    stageLabel(rowY.screened, rowY.screened+rowH.screened, "Cribado");
-    box(mainX, rowY.screened, boxW, rowH.screened,
-      wrapLabel(scr.screened.breakdown, 40), `Registros únicos cribados (n = ${scr.screened.n})`);
-    arrowH(mainX+boxW, sideX+2, rowY.screened+rowH.screened/2);
-    box(sideX, rowY.screened, sideW, rowH.screened,
-      wrapLabel(scr.excluded.breakdown, 30), `Excluidos (n = ${scr.excluded.n})`, "prisma-excluded");
+    // Row 2: screened -> excluded (side branch)
+    const hC = box(mainX, y, boxW, `Registros únicos cribados por título y resumen (n = ${p.screenedTotal})`, []);
+    const excludedLines = [];
+    p.excludedReasons.forEach(r=> wrapLabel(r, 40).forEach((l,i)=> excludedLines.push((i===0?"– ":"   ")+l)));
+    const hD = box(sideX, y, sideW, `Registros excluidos (n = ${p.excludedTotal})`, excludedLines, "prisma-removed");
+    arrowH(mainX+boxW, sideX-2, y + hC/2);
+    const row2Bottom = y + Math.max(hC, hD);
+    y = row2Bottom + 26;
 
-    arrowV(mainX+boxW/2, rowY.screened+rowH.screened, rowY.included);
-    stageLabel(rowY.included, rowY.included+rowH.included, "Incluidos");
-    box(mainX, rowY.included, boxW, rowH.included,
-      wrapLabel(inc.breakdown, 40), `Estudios incluidos a texto completo (n = ${inc.n})`, "prisma-included");
+    // Row 3: included
+    const includedLines = p.includedByDb.map(d=>`${d.label}: ${d.n}`);
+    const hE = box(mainX, y, boxW, `Estudios incluidos a texto completo (n = ${p.includedTotal})`, includedLines, "prisma-included");
 
+    arrowV(mainX+boxW/2, 4+28, 40);
+    arrowV(mainX+boxW/2, row1Bottom, row1Bottom+26);
+    arrowV(mainX+boxW/2, row2Bottom, row2Bottom+26);
+
+    stagePill(40, row1Bottom, "Identificación");
+    stagePill(row1Bottom+26, row2Bottom, "Selección");
+    stagePill(y, y+hE, "Incluidos");
+
+    const totalH = y + hE + 16;
+    const totalW = sideX + sideW + 16;
+    svg.setAttribute("viewBox", `0 0 ${totalW} ${totalH}`);
+    svg.setAttribute("width","100%");
     return svg;
   }
   function escapeXML(s){
