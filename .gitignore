@@ -10,6 +10,11 @@
 ese_indicadores_notas.md
 ImplementationResearchCourse_v*.txt
 Claude outputs/
+PostGobernanza.txt
+PosterGobernanza.png
+*.png
+*.jpg
+*.jpeg
 
 # OS / editor cruft
 .DS_Store
